@@ -1,0 +1,19 @@
+.clearfeld-minibuffer-find-file__root {
+  font-family: var(--vscode-editor-font-family);
+  font-size: var(--vscode-editor-font-size);
+  font-weight: var(--vscode-editor-font-weight);
+  background-color: var(--vscode-editor-background);
+}
+
+body {
+  overflow: hidden;
+}
+
+pre {
+  font-family: var(--vscode-editor-font-family);
+  font-size: var(--vscode-editor-font-size);
+}
+
+.clearfeld-minibuffer-search-result-line {
+  color: "var(--vscode-symbolIcon-functionForeground)";
+}

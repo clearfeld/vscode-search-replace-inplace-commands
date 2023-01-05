@@ -1,0 +1,90 @@
+{
+  "name": "search-and-replace-commands",
+  "description": "Additional search and replace commands.",
+  "version": "0.0.1",
+  "publisher": "clearfeld",
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/clearfeld/vscode-emacs-style-find-file-commands"
+  },
+  "engines": {
+    "vscode": "^1.73.0"
+  },
+  "extensionKind": [],
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onView:clearfeld.findFileView",
+    "onCommand:clearfeld.findFileEditor",
+    "onCommand:clearfeld.findFilePanel"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "panel": [
+        {
+          "id": "clearfeld-minibuffer-find-file-view",
+          "title": "Minibuffer",
+          "icon": "fancy.icon",
+          "when": "clearfeld.findFilePanel"
+        }
+      ]
+    },
+    "views": {
+      "clearfeld-minibuffer-find-file-view": [
+        {
+          "type": "webview",
+          "id": "clearfeld.findFileView",
+          "name": "File Open",
+          "when": "clearfeld.findFilePanel"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "clearfeld.findFileEditor",
+        "category": "clearfeld",
+        "title": "Find File (Editor)"
+      },
+      {
+        "command": "clearfeld.findFilePanel",
+        "category": "clearfeld",
+        "title": "Find File (Panel)"
+      }
+    ],
+    "configuration": {
+      "title": "clearfeld Find File",
+      "properties": {
+        "clearfeld-search-and-replace-commands.defaultDirectory": {
+          "type": "string",
+          "default": "",
+          "description": "Default directory to use if not able to find underlying directory of active file and or view."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "lint": "eslint \"src/**/*.ts\"",
+    "watch": "tsc -w -p ./"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.25",
+    "@types/react-dom": "^18.0.8",
+    "@types/vscode": "^1.73.0",
+    "@typescript-eslint/eslint-plugin": "^5.42.0",
+    "@typescript-eslint/parser": "^5.42.0",
+    "@vitejs/plugin-react": "^2.2.0",
+    "eslint": "^8.26.0",
+    "typescript": "^4.8.4",
+    "vite": "^3.2.3"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}
