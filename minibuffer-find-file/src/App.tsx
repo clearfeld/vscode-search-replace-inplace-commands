@@ -123,6 +123,13 @@ function App() {
 
     if (e.key === "Enter") {
       e.preventDefault();
+
+      vscode.postMessage({
+        type: "Enter",
+        // value: iv,
+      });
+      return;
+
       // console.log("Enter was pressed was presses");
 
       if (iv.includes(":")) {
@@ -227,12 +234,32 @@ function App() {
         // window.scrollBy(0, -line_height);
         listRef.current!.scrollToItem(indexChoice - 1);
         // listRef.current.scrollBy(0, -line_height);
+
+
+        console.log(dirDataFiltered[indexChoice - 1]);
+        console.log(dirDataFiltered[indexChoice - 1].split(":")[0]);
+
+      vscode.postMessage({
+        type: "MoveToLine",
+        value: parseInt(dirDataFiltered[indexChoice - 1].split(":")[0]),
+        start_char: iv[0],
+        end_char: iv[iv.length - 1],
+      });
+
       }
     } else if (e.keyCode === 40) {
       e.preventDefault();
       if (indexChoice !== dirDataFiltered.length - 2) {
         listRef.current!.scrollToItem(indexChoice + 1);
         setIndexChoice(indexChoice + 1);
+
+      vscode.postMessage({
+        type: "MoveToLine",
+        value: parseInt(dirDataFiltered[indexChoice + 1].split(":")[0]),
+        start_char: iv[0],
+        end_char: iv[iv.length - 1],
+      });
+
         // window.scrollBy(0, line_height);
         // listRef.current.scrollBy(0, line_height);
       }
@@ -293,7 +320,7 @@ function App() {
       // console.log("Backspace was pressed was presses");
       // vscode.postMessage({
       //   type: "Enter",
-      //   value: iv,
+      //   // value: iv,
       // });
       // currentDir.current = currentDir.current + "\\bin";
     }
@@ -322,13 +349,9 @@ function App() {
           </div>
 
           <List
-          style={{
-marginTop: "17px"
-          }}
-            //  height={150}
-            //  itemCount={1000}
-            //  itemSize={35}
-            // width={300}
+            style={{
+              marginTop: "17px",
+            }}
             height={line_height * 13}
             itemCount={dirDataFiltered.length - 1}
             itemSize={line_height}
@@ -340,35 +363,19 @@ marginTop: "17px"
               // console.log("abc");
 
               return (
-                <div style={style}
-                className={
-                  "clearfeld-minibuffer-search-result-line clearfeld-minibuffer-find-file__result-row " +
-                  (indexChoice === index &&
-                    "clearfeld-minibuffer-find-file__result-current-selection ")
-                }>
+                <div
+                  style={style}
+                  className={
+                    "clearfeld-minibuffer-search-result-line clearfeld-minibuffer-find-file__result-row " +
+                    (indexChoice === index &&
+                      "clearfeld-minibuffer-find-file__result-current-selection ")
+                  }
+                >
                   <pre>{data[index]}</pre>
                 </div>
               );
             }}
           </List>
-
-          {/* <div className="clearfeld-minibuffer-find-file__results-wrapper">
-            {dirDataFiltered.map((line: string, idx: number) => {
-              return (
-                <div
-                  key={idx}
-                  className={
-                    "clearfeld-minibuffer-search-result-line clearfeld-minibuffer-find-file__result-row " +
-                    (indexChoice === idx &&
-                      "clearfeld-minibuffer-find-file__result-current-selection ")
-                  }
-                >
-                  <pre>{line}</pre>
-                </div>
-              );
-            })}
-          </div>
-           */}
         </div>
       )}
     </div>

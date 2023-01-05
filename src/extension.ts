@@ -4,7 +4,7 @@ import * as Path from "path";
 // @ts-ignore
 import * as cp from "child_process";
 
-let defaultDir = null;
+let defaultDir: string | null = null;
 
 async function pathToCurrentFile(): Promise<string | null> {
   const currentEditor = vscode.window.activeTextEditor;
@@ -311,30 +311,29 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
           }
           break;
 
-        // case "Enter":
-        //   {
-        //     cp.exec(
-        //       `dir /o "${data.value}"`,
-        //       (err: any, stdout: any, stderr: any) => {
-        //         // console.log("stderr: " + stderr);
-        //         if (err) {
-        //           console.log("stderr - error: " + err);
-        //         } else {
-        //           console.log("stdout - " + stdout);
-        //           // get current theme properties color
-        //           // respect theme color choice
-        //           // const color = new vscode.ThemeColor('badge.background');
+        case "MoveToLine":
+          {
+            let editor = vscode.window.activeTextEditor;
+            if (editor) {
+              let range = editor.document.lineAt(data.value - 1).range;
+              editor.selection = new vscode.Selection(range.start, range.end);
+              editor.revealRange(range);
+            }
+          }
+          break;
 
-        //           const result = stdout.split(/\r?\n/);
-        //           this._view?.webview.postMessage({
-        //             command: "directory_change",
-        //             data: JSON.stringify(result),
-        //           });
-        //         }
-        //       }
-        //     );
-        //   }
-        //   break;
+        case "Enter":
+          {
+            this._view = undefined;
+            vscode.commands.executeCommand(
+              "setContext",
+              "clearfeld.findFilePanel",
+              false
+            );
+
+            ClosePanelOnCompletionIfNotInitiallyOpened();
+          }
+          break;
 
         case "Quit":
           {
