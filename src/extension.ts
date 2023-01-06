@@ -156,34 +156,41 @@ export function activate(context: vscode.ExtensionContext) {
 
       provider._view.show(true);
 
-      // this.rgProc = cp.spawn(rgPath, rgArgs.args, { cwd: rootFolder });
-
-      cp.exec(cmd, (err: any, stdout: any, stderr: any) => {
-        // cp.exec(`cd && ls -al --group-directories-first C:\\ | awk '{print $9 "\`" $1 "\`" $5 "\`" $6" "$7" "$8}'`, (err: any, stdout: any, stderr: any) => {
-        console.log("stdout: " + stdout);
-        console.log("stderr: " + stderr);
-        if (err) {
-          console.log("error: " + err);
-        } else {
-          // get current theme properties color
-          // respect theme color choice
-          // const color = new vscode.ThemeColor('badge.background');
-
-          const result = stdout.split(/\r?\n/);
-          provider._view?.webview.postMessage({
-            command: "refactor",
-            data: JSON.stringify(result),
-            directory: JSON.stringify(defaultDir),
-          });
-        }
+      provider._view?.webview.postMessage({
+        command: "cp_results",
+        data: [""]
+        // data: [],
+        // directory: JSON.stringify(defaultDir),
       });
+      return;
+      // // this.rgProc = cp.spawn(rgPath, rgArgs.args, { cwd: rootFolder });
 
-      // // Send a message to our webview.
-      // // You can send any JSON serializable data.
-      // provider._view.webview.postMessage({
-      //   command: "refactor",
-      //   data: dir,
+      // cp.exec(cmd, (err: any, stdout: any, stderr: any) => {
+      //   // cp.exec(`cd && ls -al --group-directories-first C:\\ | awk '{print $9 "\`" $1 "\`" $5 "\`" $6" "$7" "$8}'`, (err: any, stdout: any, stderr: any) => {
+      //   console.log("stdout: " + stdout);
+      //   console.log("stderr: " + stderr);
+      //   if (err) {
+      //     console.log("error: " + err);
+      //   } else {
+      //     // get current theme properties color
+      //     // respect theme color choice
+      //     // const color = new vscode.ThemeColor('badge.background');
+
+      //     const result = stdout.split(/\r?\n/);
+      //     provider._view?.webview.postMessage({
+      //       command: "cp_results",
+      //       data: result,
+      //       directory: JSON.stringify(defaultDir),
+      //     });
+      //   }
       // });
+
+      // // // Send a message to our webview.
+      // // // You can send any JSON serializable data.
+      // // provider._view.webview.postMessage({
+      // //   command: "refactor",
+      // //   data: dir,
+      // // });
     })
   );
 }
@@ -332,8 +339,8 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
 
                 const result = stdout.split(/\r?\n/);
                 this._view?.webview.postMessage({
-                  command: "directory_change",
-                  data: JSON.stringify(result),
+                  command: "cp_results",
+                  data: result, // JSON.stringify(result),
                 });
               }
             });

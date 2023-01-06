@@ -45,41 +45,18 @@ function App() {
 
   function HandleMessages(event: any) {
     switch (event.data.command) {
-      case "refactor":
+      case "cp_results":
         {
           setIndexChoice(0);
-          console.log("RawRawRaw Data", event.data.data);
+          // console.log("RawRawRaw Data", event.data.data);
 
-          let x = JSON.parse(event.data.data);
+          let x = event.data.data;
           x.shift();
-          // setDirDataRaw(x);
 
-          ParseDirData(x);
-        }
-        break;
-
-      case "directory_change":
-        {
-          setIndexChoice(0);
-
-          let x = JSON.parse(event.data.data);
-          x.shift();
-          // setDirDataRaw(x);
-
-          ParseDirData(x);
+          setDirDataFiltered(x);
         }
         break;
     }
-  }
-
-  function ParseDirData(dirDataRaw) {
-    console.log("Raw Data", dirDataRaw);
-    // dirDataRaw.pop();
-    // dirDataRaw.pop();
-    // dirDataRaw.pop();
-    setDirData(dirDataRaw);
-    setDirDataFiltered(dirDataRaw);
-    return;
   }
 
   function InputOnChange(e) {
@@ -91,16 +68,6 @@ function App() {
       setIndexChoice(0);
       window.scrollBy(0, 0);
     } else {
-      // let x = [];
-      // for (let i = 0; i < dirData.length - 1; ++i) {
-      //   // console.log(dirData[i].name, e.target.value);
-      //   if (
-      //     dirData[i].name.toLowerCase().includes(e.target.value.toLowerCase())
-      //   ) {
-      //     x.push(dirData[i]);
-      //   }
-      // }
-      // setDirDataFiltered(x);
       setIndexChoice(0);
       window.scrollBy(0, 0);
 
@@ -226,13 +193,20 @@ function App() {
           display: "flex",
         }}
       >
-        {LineObject.line_number}:
+        <span
+          style={{
+            color: "var(--vscode-editorLineNumber-foreground)",
+          }}
+        >
+          {LineObject.line_number}:
+        </span>
         {line_poritions.map((line_block: any, lidx: number) => {
           if (line_block.highlight) {
             return (
               <span
                 style={{
-                  backgroundColor: "var(--vscode-terminal-findMatchHighlightBackground)",
+                  backgroundColor:
+                    "var(--vscode-terminal-findMatchHighlightBackground)",
                 }}
               >
                 {line_block.value}
@@ -251,9 +225,15 @@ function App() {
       {dirDataFiltered && (
         <div>
           <div className="clearfeld-minibuffer-find-file__input-line">
-            <span>
-              {indexChoice + 1}/{dirDataFiltered.length - RG_TOTAL_OFFSET}
-            </span>
+            {dirDataFiltered.length === 0 ? (
+              <span>
+                !/0
+              </span>
+            ) : (
+              <span>
+                {indexChoice + 1}/{dirDataFiltered.length - RG_TOTAL_OFFSET}
+              </span>
+            )}
             <span> Go to line: </span>
             <input
               className="clearfeld-minibuffer-find-file__input"
