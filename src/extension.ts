@@ -37,57 +37,57 @@ export function activate(context: vscode.ExtensionContext) {
     )
   );
 
-  context.subscriptions.push(
-    vscode.commands.registerCommand("clearfeld.findFileEditor", async () => {
-      provider.createCatCodingView();
+  // context.subscriptions.push(
+  //   vscode.commands.registerCommand("clearfeld.findFileEditor", async () => {
+  //     provider.createCatCodingView();
 
-      if (!provider._panel) {
-        return;
-      }
+  //     if (!provider._panel) {
+  //       return;
+  //     }
 
-      let defaultDir = await pathToCurrentFile();
-      console.log("defaultDir - ", defaultDir);
+  //     let defaultDir = await pathToCurrentFile();
+  //     console.log("defaultDir - ", defaultDir);
 
-      let cmd = "cd && dir /o";
-      let dir = null;
+  //     let cmd = "cd && dir /o";
+  //     let dir = null;
 
-      if (defaultDir !== null) {
-        defaultDir += Path.sep;
-        dir = vscode.Uri.file(defaultDir);
-        defaultDir = defaultDir.substr(1, defaultDir.length - 2);
-        defaultDir = defaultDir.replaceAll("/", "\\");
-        // cmd = `cd ${defaultDir} && dir /o`;
-        cmd = `dir /o ${defaultDir}`;
-      } else {
-        defaultDir = EXT_DefaultDirectory;
-      }
-      console.log("defaultDir - ", defaultDir);
+  //     if (defaultDir !== null) {
+  //       defaultDir += Path.sep;
+  //       dir = vscode.Uri.file(defaultDir);
+  //       defaultDir = defaultDir.substr(1, defaultDir.length - 2);
+  //       defaultDir = defaultDir.replaceAll("/", "\\");
+  //       // cmd = `cd ${defaultDir} && dir /o`;
+  //       cmd = `dir /o ${defaultDir}`;
+  //     } else {
+  //       defaultDir = EXT_DefaultDirectory;
+  //     }
+  //     console.log("defaultDir - ", defaultDir);
 
-      // // enable this to get dir of active editor
-      // if (dir !== null) {
-      //   // console.log(defaultDir);
-      //   let dirx = defaultDir?.substring(1, defaultDir.length - 1);
-      //   cmd = `cd ${dirx} && dir /o ${dirx}`;
-      //   console.log(cmd);
-      //   //cmd = cmd + " " + defaultDir?.substring(1, defaultDir.length - 1);
-      // }
+  //     // // enable this to get dir of active editor
+  //     // if (dir !== null) {
+  //     //   // console.log(defaultDir);
+  //     //   let dirx = defaultDir?.substring(1, defaultDir.length - 1);
+  //     //   cmd = `cd ${dirx} && dir /o ${dirx}`;
+  //     //   console.log(cmd);
+  //     //   //cmd = cmd + " " + defaultDir?.substring(1, defaultDir.length - 1);
+  //     // }
 
-      cp.exec(cmd, (err: any, stdout: any, stderr: any) => {
-        console.log("stdout: " + stdout);
-        console.log("stderr: " + stderr);
-        if (err) {
-          console.log("error: " + err);
-        } else {
-          const result = stdout.split(/\r?\n/);
-          provider._panel?.webview.postMessage({
-            command: "refactor",
-            data: JSON.stringify(result),
-            directory: JSON.stringify(defaultDir),
-          });
-        }
-      });
-    })
-  );
+  //     cp.exec(cmd, (err: any, stdout: any, stderr: any) => {
+  //       console.log("stdout: " + stdout);
+  //       console.log("stderr: " + stderr);
+  //       if (err) {
+  //         console.log("error: " + err);
+  //       } else {
+  //         const result = stdout.split(/\r?\n/);
+  //         provider._panel?.webview.postMessage({
+  //           command: "refactor",
+  //           data: JSON.stringify(result),
+  //           directory: JSON.stringify(defaultDir),
+  //         });
+  //       }
+  //     });
+  //   })
+  // );
 
   // Our new command
   context.subscriptions.push(
@@ -103,7 +103,7 @@ export function activate(context: vscode.ExtensionContext) {
         return;
       }
 
-      let cmd = `rg "t" ${defaultDir} --line-number`;
+      let cmd = `rg "" ${defaultDir} --json -i`;
       let dir = null;
 
       /// TODO: investigate this more this seems too hackish to leave as is
@@ -183,80 +183,80 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
     private readonly _myUri: vscode.Uri
   ) {}
 
-  public createCatCodingView() {
-    // _token: vscode.CancellationToken // context: vscode.WebviewViewResolveContext, // webviewView: vscode.WebviewView,
-    // Create and show panel
-    // let vuri = new vscode.Uri;
-    this._panel = vscode.window.createWebviewPanel(
-      "clearfeld.findFileView",
-      // "my-fancy-view",// this.viewType, // "catCoding",
-      "Minibuffer: File Open",
-      vscode.ViewColumn.Active,
-      this.webview_options
-    );
+  // public createCatCodingView() {
+  //   // _token: vscode.CancellationToken // context: vscode.WebviewViewResolveContext, // webviewView: vscode.WebviewView,
+  //   // Create and show panel
+  //   // let vuri = new vscode.Uri;
+  //   this._panel = vscode.window.createWebviewPanel(
+  //     "clearfeld.findFileView",
+  //     // "my-fancy-view",// this.viewType, // "catCoding",
+  //     "Minibuffer: File Open",
+  //     vscode.ViewColumn.Active,
+  //     this.webview_options
+  //   );
 
-    // And set its HTML content
-    this._panel.webview.html = this._getHtmlForWebview(this._panel.webview);
+  //   // And set its HTML content
+  //   this._panel.webview.html = this._getHtmlForWebview(this._panel.webview);
 
-    this._panel.webview.onDidReceiveMessage(async (data) => {
-      switch (data.type) {
-        case "OpenFile":
-          {
-            console.log("data.value - ", data.value);
-            vscode.workspace.openTextDocument(data.value).then((document) => {
-              vscode.window.showTextDocument(document);
-              this._panel?.dispose();
-            });
-          }
-          break;
+  //   this._panel.webview.onDidReceiveMessage(async (data) => {
+  //     switch (data.type) {
+  //       case "OpenFile":
+  //         {
+  //           console.log("data.value - ", data.value);
+  //           vscode.workspace.openTextDocument(data.value).then((document) => {
+  //             vscode.window.showTextDocument(document);
+  //             this._panel?.dispose();
+  //           });
+  //         }
+  //         break;
 
-        case "CreateFile":
-          {
-            let buf = new Uint8Array();
-            let duri = vscode.Uri.file(data.directory + "\\" + data.value);
-            let throw_away = await vscode.workspace.fs.writeFile(duri, buf);
-            // @ts-ignore
-            const openPath = vscode.Uri.parse(duri);
-            vscode.workspace.openTextDocument(openPath).then((document) => {
-              vscode.window.showTextDocument(document);
-              this._panel?.dispose();
-            });
-          }
-          break;
+  //       case "CreateFile":
+  //         {
+  //           let buf = new Uint8Array();
+  //           let duri = vscode.Uri.file(data.directory + "\\" + data.value);
+  //           let throw_away = await vscode.workspace.fs.writeFile(duri, buf);
+  //           // @ts-ignore
+  //           const openPath = vscode.Uri.parse(duri);
+  //           vscode.workspace.openTextDocument(openPath).then((document) => {
+  //             vscode.window.showTextDocument(document);
+  //             this._panel?.dispose();
+  //           });
+  //         }
+  //         break;
 
-        case "Enter": {
-          cp.exec(
-            `dir /o "${data.value}"`,
-            (err: any, stdout: any, stderr: any) => {
-              // console.log("stderr: " + stderr);
-              if (err) {
-                console.log("stderr - error: " + err);
-              } else {
-                console.log("stdout - " + stdout);
-                // get current theme properties color
-                // respect theme color choice
-                // const color = new vscode.ThemeColor('badge.background');
+  //       case "Enter": {
+  //         cp.exec(
+  //           `dir /o "${data.value}"`,
+  //           (err: any, stdout: any, stderr: any) => {
+  //             // console.log("stderr: " + stderr);
+  //             if (err) {
+  //               console.log("stderr - error: " + err);
+  //             } else {
+  //               console.log("stdout - " + stdout);
+  //               // get current theme properties color
+  //               // respect theme color choice
+  //               // const color = new vscode.ThemeColor('badge.background');
 
-                const result = stdout.split(/\r?\n/);
-                this._panel?.webview.postMessage({
-                  command: "directory_change",
-                  data: JSON.stringify(result),
-                });
-              }
-            }
-          );
+  //               const result = stdout.split(/\r?\n/);
+  //               this._panel?.webview.postMessage({
+  //                 command: "directory_change",
+  //                 data: JSON.stringify(result),
+  //               });
+  //             }
+  //           }
+  //         );
 
-          break;
-        }
+  //         break;
+  //       }
 
-        case "Quit":
-          {
-            this._panel?.dispose();
-          }
-          break;
-      }
-    });
-  }
+  //       case "Quit":
+  //         {
+  //           this._panel?.dispose();
+  //         }
+  //         break;
+  //     }
+  //   });
+  // }
 
   public resolveWebviewView(
     webviewView: vscode.WebviewView,
@@ -289,7 +289,7 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
           {
             if (defaultDir === null) return;
 
-            let cmd = `rg "${data.value}" ${defaultDir} --line-number`;
+            let cmd = `rg "${data.value}" ${defaultDir} --json -i`;
 
             cp.exec(cmd, (err: any, stdout: any, stderr: any) => {
               // console.log("stderr: " + stderr);
