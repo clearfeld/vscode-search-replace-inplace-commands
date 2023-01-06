@@ -24,6 +24,35 @@ function PullConfigurationAndSet(): void {
   EXT_DefaultDirectory = (emffc_config.get("defaultDirectory") as string) ?? "";
 }
 
+const SearchResultDecorationType = vscode.window.createTextEditorDecorationType(
+  {
+    backgroundColor: "var(--vscode-editor-findMatchHighlightBackground)",
+    // borderWidth: "1px",
+    // borderStyle: "solid",
+    // overviewRulerColor: "blue",
+    // overviewRulerLane: vscode.OverviewRulerLane.Right,
+    // light: {
+    //   // this color will be used in light color themes
+    //   borderColor: "darkblue",
+    // },
+    // dark: {
+    //   // this color will be used in dark color themes
+    //   borderColor: "lightblue",
+    // },
+  }
+);
+
+const WholeLineDecorationType = vscode.window.createTextEditorDecorationType({
+  isWholeLine: true,
+  backgroundColor: "var(--vscode-list-inactiveSelectionBackground)",
+});
+
+// const largeNumberDecorationType = vscode.window.createTextEditorDecorationType({
+//   cursor: "crosshair",
+//   // use a themable color. See package.json for the declaration and default values.
+//   backgroundColor: "red", // { id: 'myextension.largeNumberBackground' }
+// });
+
 export function activate(context: vscode.ExtensionContext) {
   PullConfigurationAndSet();
 
@@ -318,10 +347,31 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
               const line = data.value - 1;
               const range = editor.document.lineAt(line).range;
 
-              const new_range = new vscode.Range(line, data.start_pos, line, data.end_pos);
+              const new_range = new vscode.Range(
+                line,
+                data.start_pos,
+                line,
+                data.end_pos
+              );
 
               // editor.selection = new vscode.Selection(range.start, range.end);
-              editor.selection = new vscode.Selection(new_range.start, new_range.end);
+              editor.selection = new vscode.Selection(
+                new_range.start,
+                new_range.start
+              );
+
+              const smallNumbers: vscode.DecorationOptions[] = [];
+              const largeNumbers: vscode.DecorationOptions[] = [];
+              const decoration = {
+                range: new vscode.Range(new_range.start, new_range.end),
+              };
+              smallNumbers.push(decoration);
+              const decorationz = {
+                range: new vscode.Range(new_range.start, new_range.start),
+              };
+              largeNumbers.push(decorationz);
+              editor.setDecorations(SearchResultDecorationType, smallNumbers);
+              editor.setDecorations(WholeLineDecorationType, largeNumbers);
 
               editor.revealRange(range);
             }
@@ -337,6 +387,12 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
               false
             );
 
+            const editor = vscode.window.activeTextEditor;
+            if (editor) {
+              editor.setDecorations(SearchResultDecorationType, []);
+              editor.setDecorations(WholeLineDecorationType, []);
+            }
+
             ClosePanelOnCompletionIfNotInitiallyOpened();
           }
           break;
@@ -349,6 +405,12 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
               "clearfeld.findFilePanel",
               false
             );
+
+            const editor = vscode.window.activeTextEditor;
+            if (editor) {
+              editor.setDecorations(SearchResultDecorationType, []);
+              editor.setDecorations(WholeLineDecorationType, []);
+            }
 
             ClosePanelOnCompletionIfNotInitiallyOpened();
           }
