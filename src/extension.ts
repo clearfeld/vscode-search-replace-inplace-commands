@@ -24,15 +24,26 @@ async function pathToCurrentFile(): Promise<string | null> {
 //   EXT_DefaultDirectory = (emffc_config.get("defaultDirectory") as string) ?? "";
 // }
 
-const SearchResultDecorationType = vscode.window.createTextEditorDecorationType({
+const SearchResultDecorationType = vscode.window.createTextEditorDecorationType(
+  {
     backgroundColor: "var(--vscode-editor-findMatchHighlightBackground)",
-});
+  }
+);
 
 const WholeLineDecorationType = vscode.window.createTextEditorDecorationType({
   isWholeLine: true,
   backgroundColor: "var(--vscode-list-inactiveSelectionBackground)",
 });
 
+function GetCurrentLineInActiveEditor(): number {
+  const editor = vscode.window.activeTextEditor;
+  if (editor != null) {
+    return editor.selection.active.line;
+    // console.log(editor.selection.active.line);
+  } else {
+    return 0;
+  }
+}
 // const largeNumberDecorationType = vscode.window.createTextEditorDecorationType({
 //   cursor: "crosshair",
 //   // use a themable color. See package.json for the declaration and default values.
@@ -145,6 +156,7 @@ export function activate(context: vscode.ExtensionContext) {
       provider._view?.webview.postMessage({
         command: "cp_results",
         data: [""],
+        line: GetCurrentLineInActiveEditor(),
         // data: [],
         // directory: JSON.stringify(defaultDir),
       });
@@ -321,6 +333,7 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
                 this._view?.webview.postMessage({
                   command: "cp_results",
                   data: [""],
+                  line: GetCurrentLineInActiveEditor(),
                 });
               } else {
                 // console.log("stdout - " + stdout);
@@ -332,6 +345,7 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
                 this._view?.webview.postMessage({
                   command: "cp_results",
                   data: result, // JSON.stringify(result),
+                  line: GetCurrentLineInActiveEditor(),
                 });
               }
             });

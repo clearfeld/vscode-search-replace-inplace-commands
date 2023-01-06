@@ -1,22 +1,18 @@
 import { useState, React, useEffect, useRef } from "react";
-import { DebugConsoleMode } from "vscode";
+
 // import reactLogo from "./assets/react.svg";
 import "./App.css";
 import { FixedSizeList as List } from "react-window";
 import { CSSProperties } from "react";
+import { DebugConsoleMode } from "vscode";
 
 // @ts-ignore
 const vscode = acquireVsCodeApi();
 
-// TODO: move screen immediatly
-// TODO: start results from line number
-
-// TODO: add gif to readme
-
 // NOTE: rg --json produces an empty line, a summary line, begin and end lines
 // so we take off 3 from the array size to get total lines that count matches
 // the first none used line is shifted in the initial cp_res message handle
-const RG_TOTAL_OFFSET = 4 - 1;
+// const RG_TOTAL_OFFSET = 4 - 1;
 
 function App() {
   const inputRef = useRef(null);
@@ -54,13 +50,83 @@ function App() {
           setIndexChoice(0);
           // console.log("RawRawRaw Data", event.data.data);
 
+          console.log("line", event.data.line);
           let x = event.data.data;
-          x.shift();
 
-          setDirDataFiltered(x);
+          if (x[0] === "") {
+            setDirDataFiltered(x);
+            return;
+          }
+
+          let idx = x.length - 1;
+
+          // console.log(x, idx);
+
+          // Sometimes the last element in the ripgrep json will be an empty line
+          if (x[idx] === "") {
+            x.pop();
+            idx -= 1;
+          }
+
+          // removing all none match types from array
+          while (true) {
+            if (JSON.parse(x[idx]).type !== "match") {
+              x.pop();
+              idx -= 1;
+            } else {
+              break;
+            }
+          }
+          // cont...
+          if (JSON.parse(x[0]).type !== "match") {
+            x.shift();
+          }
+
+          // console.log(x);
+          let res = BinarySearchNearest(x, event.data.line);
+          // console.log("res bsn - ", res);
+
+          let sort = [...x.slice(res, x.length), ...x.slice(0, res)];
+
+          // console.log(sort);
+
+          setDirDataFiltered(sort);
         }
         break;
     }
+  }
+
+  function BinarySearchNearest(arr: [], line: number): number {
+    let start = 0;
+    let end = arr.length - 1;
+    let mid; //  = Math.floor((start + end) / 2);
+
+    while (start <= end) {
+      mid = Math.floor((start + end) / 2);
+      // console.log("MSE ", mid, start, end);
+
+      if (mid + 1 === end || mid - 1 === start) {
+        // nearest or exact match
+        return mid;
+      }
+
+      const ap = JSON.parse(arr[mid]);
+      if (ap.type !== "match") {
+        // TODO: test this out a bit for desired behaviour
+        return mid; // -1
+      }
+
+      // console.log("Line numbers - ", ap.data.line_number, line);
+      if (line < ap.data.line_number) {
+        end = mid - 1;
+      } else {
+        start = mid + 1;
+      }
+    }
+
+    // TODO: testing
+    // If error just default to using first_index
+    return 0;
   }
 
   function InputOnChange(e) {
@@ -137,7 +203,7 @@ function App() {
       }
     } else if (e.keyCode === 40) {
       e.preventDefault();
-      if (indexChoice !== dirDataFiltered.length - RG_TOTAL_OFFSET - 1) {
+      if (indexChoice !== dirDataFiltered.length - 1) {
         listRef.current!.scrollToItem(indexChoice + 1);
         setIndexChoice(indexChoice + 1);
 
@@ -234,12 +300,10 @@ function App() {
         <div>
           <div className="clearfeld-minibuffer-find-file__input-line">
             {dirDataFiltered.length === 0 ? (
-              <span>
-                !/0
-              </span>
+              <span>!/0</span>
             ) : (
               <span>
-                {indexChoice + 1}/{dirDataFiltered.length - RG_TOTAL_OFFSET}
+                {indexChoice + 1}/{dirDataFiltered.length - 1}
               </span>
             )}
             <span> Go to line: </span>
@@ -261,7 +325,7 @@ function App() {
               marginTop: "17px",
             }}
             height={line_height * 13}
-            itemCount={dirDataFiltered.length - RG_TOTAL_OFFSET}
+            itemCount={dirDataFiltered.length - 1} //  - RG_TOTAL_OFFSET}
             itemSize={line_height}
             width={"100%"}
             itemData={dirDataFiltered}
