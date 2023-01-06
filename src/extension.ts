@@ -331,6 +331,11 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
               // console.log("stderr: " + stderr);
               if (err) {
                 console.log("stderr - error: " + err);
+
+                this._view?.webview.postMessage({
+                  command: "cp_results",
+                  data: [""]
+                });
               } else {
                 console.log("stdout - " + stdout);
                 // get current theme properties color
@@ -396,8 +401,26 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
 
             const editor = vscode.window.activeTextEditor;
             if (editor) {
+              const line = data.value - 1;
+              const range = editor.document.lineAt(line).range;
+
+              const new_range = new vscode.Range(
+                line,
+                data.start_pos,
+                line,
+                data.end_pos
+              );
+
+              // editor.selection = new vscode.Selection(range.start, range.end);
+              editor.selection = new vscode.Selection(
+                new_range.start,
+                new_range.start
+              );
+
               editor.setDecorations(SearchResultDecorationType, []);
               editor.setDecorations(WholeLineDecorationType, []);
+
+              editor.revealRange(range);
             }
 
             ClosePanelOnCompletionIfNotInitiallyOpened();

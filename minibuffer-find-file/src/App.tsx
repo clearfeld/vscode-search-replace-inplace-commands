@@ -10,7 +10,7 @@ const vscode = acquireVsCodeApi();
 
 // NOTE: rg --json produces an empty line, a summary line, begin and end lines
 // so we take off 3 from the array size to get total lines that count matches
-// the first none used line is shifted in the initial cmdline res
+// the first none used line is shifted in the initial cp_res message handle
 const RG_TOTAL_OFFSET = 4 - 1;
 
 function App() {
@@ -24,7 +24,6 @@ function App() {
       css_root.getPropertyValue("--vscode-editor-font-size").slice(0, -2)
     ) + 2;
 
-  const [dirData, setDirData] = useState(null);
   const [dirDataFiltered, setDirDataFiltered] = useState(null);
 
   const [lengthLongestFileOrDirectory, setLengthLongestFileOrDirectory] =
@@ -64,7 +63,7 @@ function App() {
     setIV(e.target.value);
 
     if (e.target.value === "") {
-      setDirDataFiltered(dirData);
+      // setDirDataFiltered(dirData);
       setIndexChoice(0);
       window.scrollBy(0, 0);
     } else {
@@ -95,9 +94,13 @@ function App() {
     if (e.key === "Enter") {
       e.preventDefault();
 
+      const parsed_res = JSON.parse(dirDataFiltered[indexChoice]);
+
       vscode.postMessage({
         type: "Enter",
-        // value: iv,
+        value: parsed_res.data.line_number,
+        start_pos: parsed_res.data.submatches[0].start,
+        end_pos: parsed_res.data.submatches[0].end,
       });
 
       return;
