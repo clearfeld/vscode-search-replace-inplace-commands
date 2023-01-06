@@ -1,13 +1,13 @@
 {
-  "name": "search-and-replace-commands",
-  "description": "Additional search and replace commands.",
+  "name": "clearfeld-vscode-search-replace-inplace-commands",
+  "description": "Additional search replace and inplace commands for vscode.",
   "version": "0.0.1",
   "publisher": "clearfeld",
   "private": true,
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/clearfeld/vscode-emacs-style-find-file-commands"
+    "url": "https://github.com/clearfeld/vscode-search-replace-inplace-commands"
   },
   "engines": {
     "vscode": "^1.73.0"
@@ -17,54 +17,38 @@
     "Other"
   ],
   "activationEvents": [
-    "onView:clearfeld.findFileView",
-    "onCommand:clearfeld.findFileEditor",
-    "onCommand:clearfeld.findFilePanel"
+    "onView:clearfeld.minibufferViewConsultLine",
+    "onCommand:clearfeld.consultLine"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "viewsContainers": {
       "panel": [
         {
-          "id": "clearfeld-minibuffer-find-file-view",
+          "id": "clearfeld-minibuffer-view-consult-line",
           "title": "Minibuffer",
           "icon": "fancy.icon",
-          "when": "clearfeld.findFilePanel"
+          "when": "clearfeld.consultLine"
         }
       ]
     },
     "views": {
-      "clearfeld-minibuffer-find-file-view": [
+      "clearfeld-minibuffer-view-consult-line": [
         {
           "type": "webview",
-          "id": "clearfeld.findFileView",
-          "name": "File Open",
-          "when": "clearfeld.findFilePanel"
+          "id": "clearfeld.minibufferViewConsultLine",
+          "name": "Consult Line",
+          "when": "clearfeld.consultLine"
         }
       ]
     },
     "commands": [
       {
-        "command": "clearfeld.findFileEditor",
+        "command": "clearfeld.consultLine",
         "category": "clearfeld",
-        "title": "Find File (Editor)"
-      },
-      {
-        "command": "clearfeld.findFilePanel",
-        "category": "clearfeld",
-        "title": "Find File (Panel)"
+        "title": "Consult Line"
       }
-    ],
-    "configuration": {
-      "title": "clearfeld Find File",
-      "properties": {
-        "clearfeld-search-and-replace-commands.defaultDirectory": {
-          "type": "string",
-          "default": "",
-          "description": "Default directory to use if not able to find underlying directory of active file and or view."
-        }
-      }
-    }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

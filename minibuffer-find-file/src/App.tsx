@@ -8,6 +8,11 @@ import { CSSProperties } from "react";
 // @ts-ignore
 const vscode = acquireVsCodeApi();
 
+// TODO: move screen immediatly
+// TODO: start results from line number
+
+// TODO: add gif to readme
+
 // NOTE: rg --json produces an empty line, a summary line, begin and end lines
 // so we take off 3 from the array size to get total lines that count matches
 // the first none used line is shifted in the initial cp_res message handle

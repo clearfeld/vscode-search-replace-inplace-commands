@@ -15,32 +15,18 @@ async function pathToCurrentFile(): Promise<string | null> {
   return null;
 }
 
-let EXT_DefaultDirectory: string;
+// let EXT_DefaultDirectory: string;
 
-function PullConfigurationAndSet(): void {
-  const emffc_config = vscode.workspace.getConfiguration(
-    "clearfeld-search-and-replace-commands"
-  );
-  EXT_DefaultDirectory = (emffc_config.get("defaultDirectory") as string) ?? "";
-}
+// function PullConfigurationAndSet(): void {
+//   const emffc_config = vscode.workspace.getConfiguration(
+//     "clearfeld-search-replace-inplace-commands"
+//   );
+//   EXT_DefaultDirectory = (emffc_config.get("defaultDirectory") as string) ?? "";
+// }
 
-const SearchResultDecorationType = vscode.window.createTextEditorDecorationType(
-  {
+const SearchResultDecorationType = vscode.window.createTextEditorDecorationType({
     backgroundColor: "var(--vscode-editor-findMatchHighlightBackground)",
-    // borderWidth: "1px",
-    // borderStyle: "solid",
-    // overviewRulerColor: "blue",
-    // overviewRulerLane: vscode.OverviewRulerLane.Right,
-    // light: {
-    //   // this color will be used in light color themes
-    //   borderColor: "darkblue",
-    // },
-    // dark: {
-    //   // this color will be used in dark color themes
-    //   borderColor: "lightblue",
-    // },
-  }
-);
+});
 
 const WholeLineDecorationType = vscode.window.createTextEditorDecorationType({
   isWholeLine: true,
@@ -54,7 +40,7 @@ const WholeLineDecorationType = vscode.window.createTextEditorDecorationType({
 // });
 
 export function activate(context: vscode.ExtensionContext) {
-  PullConfigurationAndSet();
+  // PullConfigurationAndSet();
 
   // @ts-ignore
   const provider = new ColorsViewProvider(context.extensionUri);
@@ -120,7 +106,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Our new command
   context.subscriptions.push(
-    vscode.commands.registerCommand("clearfeld.findFilePanel", async () => {
+    vscode.commands.registerCommand("clearfeld.consultLine", async () => {
       defaultDir = await pathToCurrentFile();
       console.log("defaultDir - ", defaultDir);
       if (defaultDir !== null) {
@@ -139,14 +125,14 @@ export function activate(context: vscode.ExtensionContext) {
       let throw_away = null;
       throw_away = await vscode.commands.executeCommand(
         "setContext",
-        "clearfeld.findFilePanel",
+        "clearfeld.consultLine",
         true
       );
       throw_away = await vscode.commands.executeCommand(
-        "clearfeld.findFileView.focus"
+        "clearfeld.minibufferViewConsultLine.focus"
       );
       throw_away = await vscode.commands.executeCommand(
-        "clearfeld.findFileView.focus"
+        "clearfeld.minibufferViewConsultLine.focus"
       );
       ///
 
@@ -158,7 +144,7 @@ export function activate(context: vscode.ExtensionContext) {
 
       provider._view?.webview.postMessage({
         command: "cp_results",
-        data: [""]
+        data: [""],
         // data: [],
         // directory: JSON.stringify(defaultDir),
       });
@@ -196,7 +182,7 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 class ColorsViewProvider implements vscode.WebviewViewProvider {
-  public static readonly viewType = "clearfeld.findFileView";
+  public static readonly viewType = "clearfeld.minibufferViewConsultLine";
 
   public _view?: vscode.WebviewView;
   public _panel?: vscode.WebviewPanel;
@@ -334,10 +320,10 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
 
                 this._view?.webview.postMessage({
                   command: "cp_results",
-                  data: [""]
+                  data: [""],
                 });
               } else {
-                console.log("stdout - " + stdout);
+                // console.log("stdout - " + stdout);
                 // get current theme properties color
                 // respect theme color choice
                 // const color = new vscode.ThemeColor('badge.background');
@@ -395,7 +381,7 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
             this._view = undefined;
             vscode.commands.executeCommand(
               "setContext",
-              "clearfeld.findFilePanel",
+              "clearfeld.consultLine",
               false
             );
 
@@ -432,7 +418,7 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
             this._view = undefined;
             vscode.commands.executeCommand(
               "setContext",
-              "clearfeld.findFilePanel",
+              "clearfeld.consultLine",
               false
             );
 
