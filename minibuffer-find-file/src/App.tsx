@@ -148,14 +148,16 @@ function App() {
         listRef.current!.scrollToItem(indexChoice - 1);
         // listRef.current.scrollBy(0, -line_height);
 
-        console.log(dirDataFiltered[indexChoice - 1]);
-        console.log(dirDataFiltered[indexChoice - 1].split(":")[0]);
+        // console.log(dirDataFiltered[indexChoice - 1]);
+        // console.log(dirDataFiltered[indexChoice - 1].split(":")[0]);
+
+        const parsed_res = JSON.parse(dirDataFiltered[indexChoice - 1]);
 
         vscode.postMessage({
           type: "MoveToLine",
-          value: JSON.parse(dirDataFiltered[indexChoice - 1]).data.line_number,
-          start_char: iv[0],
-          end_char: iv[iv.length - 1],
+          value: parsed_res.data.line_number,
+          start_pos: parsed_res.data.submatches[0].start,
+          end_pos: parsed_res.data.submatches[0].end,
         });
       }
     } else if (e.keyCode === 40) {
@@ -164,11 +166,13 @@ function App() {
         listRef.current!.scrollToItem(indexChoice + 1);
         setIndexChoice(indexChoice + 1);
 
+        const parsed_res = JSON.parse(dirDataFiltered[indexChoice + 1]);
+
         vscode.postMessage({
           type: "MoveToLine",
-          value: JSON.parse(dirDataFiltered[indexChoice + 1]).data.line_number,
-          start_char: iv[0],
-          end_char: iv[iv.length - 1],
+          value: parsed_res.data.line_number,
+          start_pos: parsed_res.data.submatches[0].start,
+          end_pos: parsed_res.data.submatches[0].end,
         });
 
         // window.scrollBy(0, line_height);

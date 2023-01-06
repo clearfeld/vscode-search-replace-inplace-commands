@@ -313,10 +313,16 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
 
         case "MoveToLine":
           {
-            let editor = vscode.window.activeTextEditor;
+            const editor = vscode.window.activeTextEditor;
             if (editor) {
-              let range = editor.document.lineAt(data.value - 1).range;
-              editor.selection = new vscode.Selection(range.start, range.end);
+              const line = data.value - 1;
+              const range = editor.document.lineAt(line).range;
+
+              const new_range = new vscode.Range(line, data.start_pos, line, data.end_pos);
+
+              // editor.selection = new vscode.Selection(range.start, range.end);
+              editor.selection = new vscode.Selection(new_range.start, new_range.end);
+
               editor.revealRange(range);
             }
           }
