@@ -347,6 +347,56 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
                   data: result, // JSON.stringify(result),
                   line: GetCurrentLineInActiveEditor(),
                 });
+
+                // // mmove to line
+                // if (result.length > 1) {
+                //   const parse_res = JSON.parse(result[1]);
+                //   if (parse_res.type === "match") {
+                //     const editor = vscode.window.activeTextEditor;
+                //     if (editor) {
+                //       const line = parse_res.data.line_number - 1;
+
+                //       const range = editor.document.lineAt(line).range;
+
+                //       const new_range = new vscode.Range(
+                //         line,
+                //         parse_res.data.submatches[0].start,
+                //         line,
+                //         parse_res.data.submatches[0].end
+                //       );
+
+                //       // editor.selection = new vscode.Selection(range.start, range.end);
+                //       editor.selection = new vscode.Selection(
+                //         new_range.start,
+                //         new_range.start
+                //       );
+
+                //       const smallNumbers: vscode.DecorationOptions[] = [];
+                //       const largeNumbers: vscode.DecorationOptions[] = [];
+                //       const decoration = {
+                //         range: new vscode.Range(new_range.start, new_range.end),
+                //       };
+                //       smallNumbers.push(decoration);
+                //       const decorationz = {
+                //         range: new vscode.Range(
+                //           new_range.start,
+                //           new_range.start
+                //         ),
+                //       };
+                //       largeNumbers.push(decorationz);
+                //       editor.setDecorations(
+                //         SearchResultDecorationType,
+                //         smallNumbers
+                //       );
+                //       editor.setDecorations(
+                //         WholeLineDecorationType,
+                //         largeNumbers
+                //       );
+
+                //       editor.revealRange(range);
+                //     }
+                //   }
+                // }
               }
             });
           }

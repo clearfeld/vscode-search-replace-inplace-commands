@@ -9,10 +9,7 @@ import { DebugConsoleMode } from "vscode";
 // @ts-ignore
 const vscode = acquireVsCodeApi();
 
-// NOTE: rg --json produces an empty line, a summary line, begin and end lines
-// so we take off 3 from the array size to get total lines that count matches
-// the first none used line is shifted in the initial cp_res message handle
-// const RG_TOTAL_OFFSET = 4 - 1;
+// TODO: maybe have escape & ctrl+g return to the last line before search started
 
 function App() {
   const inputRef = useRef(null);
@@ -91,6 +88,14 @@ function App() {
           // console.log(sort);
 
           setDirDataFiltered(sort);
+
+          const parsed_res = JSON.parse(sort[0]);
+          vscode.postMessage({
+            type: "MoveToLine",
+            value: parsed_res.data.line_number,
+            start_pos: parsed_res.data.submatches[0].start,
+            end_pos: parsed_res.data.submatches[0].end,
+          });
         }
         break;
     }
@@ -325,7 +330,7 @@ function App() {
               marginTop: "17px",
             }}
             height={line_height * 13}
-            itemCount={dirDataFiltered.length - 1} //  - RG_TOTAL_OFFSET}
+            itemCount={dirDataFiltered.length - 1}
             itemSize={line_height}
             width={"100%"}
             itemData={dirDataFiltered}
