@@ -6,7 +6,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
         output: {
-            entryFileNames: "minibuffer-find-file.js",
+            entryFileNames: "view-consult-line.js",
 
             // Prevent vendor.js being created
             manualChunks: undefined,

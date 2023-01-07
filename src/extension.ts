@@ -504,15 +504,15 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
     const scriptUri = webview.asWebviewUri(
       vscode.Uri.joinPath(
         this._extensionUri,
-        "minibuffer-find-file/dist",
-        "minibuffer-find-file.js"
+        "webviews/consult-line/dist",
+        "view-consult-line.js"
       )
     );
 
     const styleUri = webview.asWebviewUri(
       vscode.Uri.joinPath(
         this._extensionUri,
-        "minibuffer-find-file/dist/assets",
+        "webviews/consult-line/dist/assets",
         "style.css"
       )
     );

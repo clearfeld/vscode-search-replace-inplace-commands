@@ -3,12 +3,14 @@
 node_modules/
 src/
 .vscode/
-minibuffer-find-file/src/
-minibuffer-find-file/node_modules/
-minibuffer-find-file/public/
-minibuffer-find-file/.gitignore
-minibuffer-find-file/index.html
-minibuffer-find-file/package-lock.json
-minibuffer-find-file/package.json
-minibuffer-find-file/tsconfig.json
-minibuffer-find-file/vite.config.js
+
+# webviews
+webviews/consult-line/src/
+webviews/consult-line/node_modules/
+webviews/consult-line/public/
+webviews/consult-line/.gitignore
+webviews/consult-line/index.html
+webviews/consult-line/package-lock.json
+webviews/consult-line/package.json
+webviews/consult-line/tsconfig.json
+webviews/consult-line/vite.config.js
