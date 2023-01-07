@@ -1,8 +1,9 @@
 {
-  "name": "clearfeld-vscode-search-replace-inplace-commands",
+  "name": "search-replace-inplace-commands",
   "description": "Additional search replace and inplace commands for vscode.",
   "version": "0.0.1",
   "publisher": "clearfeld",
+  "icon": "assets/icon.png",
   "private": true,
   "license": "MIT",
   "repository": {

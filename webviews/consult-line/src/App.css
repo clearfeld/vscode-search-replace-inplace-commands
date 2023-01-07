@@ -1,3 +1,5 @@
+/* TODO: CLEAN: rename these classes */
+
 .clearfeld-minibuffer-find-file__input-line {
   position: fixed;
   top: 0;
@@ -41,4 +43,18 @@
 
 .clearfeld-minibuffer-find-file__result-current-selection {
   background-color: var(--vscode-editorWidget-background);
+}
+
+
+.clearfeld-webview-consult-line__list-search-result-row {
+  display: flex;
+}
+.clearfeld-webview-consult-line__list-search-result-line-number-color-below {
+  color: var(--vscode-editorLineNumber-foreground);
+}
+.clearfeld-webview-consult-line__list-search-result-line-number-color-above {
+  color: var(--vscode-charts-orange);
+}
+.clearfeld-webview-consult-line__list-search-result-highlight {
+  background-color: var(--vscode-terminal-findMatchHighlightBackground);
 }

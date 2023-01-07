@@ -9,7 +9,9 @@ import { DebugConsoleMode } from "vscode";
 // @ts-ignore
 const vscode = acquireVsCodeApi();
 
-// TODO: maybe have escape & ctrl+g return to the last line before search started
+// TODO: maybe have escape & ctrl+g return to the last line before search started (ouble check emacs consult line behaviour)
+// TODO: probably should try to highlight all submatches in the visible view range of the active editor
+// TODO: should probably auto loop to start or end of results when moving through search choices
 
 function App() {
   const inputRef = useRef(null);
@@ -30,6 +32,7 @@ function App() {
   const [indexChoice, setIndexChoice] = useState<number>(0);
   const [iv, setIV] = useState<string>("");
   const [showList, setShowList] = useState<boolean>(false);
+  const [editorLine, setEditorLine] = useState<number>(0);
 
   useEffect(() => {
     // @ts-ignore
@@ -50,7 +53,7 @@ function App() {
 
           // console.log("line", event.data.line);
           let x = event.data.data;
-          if(x[0] === "") {
+          if (x[0] === "") {
             setShowList(false);
             setDirDataFiltered(x);
             return;
@@ -79,6 +82,8 @@ function App() {
           if (JSON.parse(x[0]).type !== "match") {
             x.shift();
           }
+
+          setEditorLine(event.data.line);
 
           // console.log(x);
           let res = BinarySearchNearest(x, event.data.line);
@@ -268,28 +273,26 @@ function App() {
       value: line.substr(str_start, line.length - 1),
     });
 
+    const line_number_color_class =
+      "clearfeld-webview-consult-line__list-search-result-line-number-color-below";
+    // TODO: probably should highlight values above and below current line with a different line number color
+    // if (editorLine > LineObject.line_number) {
+    //   line_number_color_class =
+    //     "clearfeld-webview-consult-line__list-search-result-line-number-color-below";
+    // } else {
+    //   line_number_color_class =
+    //     "clearfeld-webview-consult-line__list-search-result-line-number-color-above";
+    // }
+
     return (
-      <pre
-        style={{
-          display: "flex",
-        }}
-      >
-        <span
-          style={{
-            color: "var(--vscode-editorLineNumber-foreground)",
-          }}
-        >
+      <pre className="clearfeld-webview-consult-line__list-search-result-row">
+        <span className={line_number_color_class}>
           {LineObject.line_number}:
         </span>
         {line_poritions.map((line_block: any, lidx: number) => {
           if (line_block.highlight) {
             return (
-              <span
-                style={{
-                  backgroundColor:
-                    "var(--vscode-terminal-findMatchHighlightBackground)",
-                }}
-              >
+              <span className="clearfeld-webview-consult-line__list-search-result-highlight">
                 {line_block.value}
               </span>
             );
@@ -306,7 +309,7 @@ function App() {
       {dirDataFiltered && (
         <div>
           <div className="clearfeld-minibuffer-find-file__input-line">
-            {dirDataFiltered.length === 0 ? (
+            {!showList ? (
               <span>!/0</span>
             ) : (
               <span>
@@ -328,39 +331,39 @@ function App() {
           </div>
 
           {showList && (
-          <List
-            style={{
-              marginTop: "17px",
-            }}
-            height={line_height * 13}
-            itemCount={dirDataFiltered.length}
-            itemSize={line_height}
-            width={"100%"}
-            itemData={dirDataFiltered}
-            ref={listRef}
-          >
-            {({ index, style, data }) => {
-              // if(data[index] === "") return null;
+            <List
+              style={{
+                marginTop: "17px",
+              }}
+              height={line_height * 13}
+              itemCount={dirDataFiltered.length}
+              itemSize={line_height}
+              width={"100%"}
+              itemData={dirDataFiltered}
+              ref={listRef}
+            >
+              {({ index, style, data }) => {
+                // if(data[index] === "") return null;
 
-              const parsed_data = JSON.parse(data[index]);
-              // if (parsed_data.type !== "match") {
-              //   return null;
-              // }
+                const parsed_data = JSON.parse(data[index]);
+                // if (parsed_data.type !== "match") {
+                //   return null;
+                // }
 
-              return (
-                <div
-                  style={style}
-                  className={
-                    "clearfeld-minibuffer-search-result-line clearfeld-minibuffer-find-file__result-row " +
-                    (indexChoice === index &&
-                      "clearfeld-minibuffer-find-file__result-current-selection ")
-                  }
-                >
-                  {GenerateLineWithHighlights(parsed_data.data)}
-                </div>
-              );
-            }}
-          </List>
+                return (
+                  <div
+                    style={style}
+                    className={
+                      "clearfeld-minibuffer-search-result-line clearfeld-minibuffer-find-file__result-row " +
+                      (indexChoice === index &&
+                        "clearfeld-minibuffer-find-file__result-current-selection ")
+                    }
+                  >
+                    {GenerateLineWithHighlights(parsed_data.data)}
+                  </div>
+                );
+              }}
+            </List>
           )}
         </div>
       )}
