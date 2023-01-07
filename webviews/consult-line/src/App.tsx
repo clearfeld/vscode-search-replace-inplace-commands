@@ -29,6 +29,7 @@ function App() {
 
   const [indexChoice, setIndexChoice] = useState<number>(0);
   const [iv, setIV] = useState<string>("");
+  const [showList, setShowList] = useState<boolean>(false);
 
   useEffect(() => {
     // @ts-ignore
@@ -47,10 +48,10 @@ function App() {
           setIndexChoice(0);
           // console.log("RawRawRaw Data", event.data.data);
 
-          console.log("line", event.data.line);
+          // console.log("line", event.data.line);
           let x = event.data.data;
-
-          if (x[0] === "") {
+          if(x[0] === "") {
+            setShowList(false);
             setDirDataFiltered(x);
             return;
           }
@@ -88,6 +89,7 @@ function App() {
           // console.log(sort);
 
           setDirDataFiltered(sort);
+          setShowList(true);
 
           const parsed_res = JSON.parse(sort[0]);
           vscode.postMessage({
@@ -308,7 +310,7 @@ function App() {
               <span>!/0</span>
             ) : (
               <span>
-                {indexChoice + 1}/{dirDataFiltered.length - 1}
+                {indexChoice + 1}/{dirDataFiltered.length}
               </span>
             )}
             <span> Go to line: </span>
@@ -325,22 +327,25 @@ function App() {
             />
           </div>
 
+          {showList && (
           <List
             style={{
               marginTop: "17px",
             }}
             height={line_height * 13}
-            itemCount={dirDataFiltered.length - 1}
+            itemCount={dirDataFiltered.length}
             itemSize={line_height}
             width={"100%"}
             itemData={dirDataFiltered}
             ref={listRef}
           >
             {({ index, style, data }) => {
+              // if(data[index] === "") return null;
+
               const parsed_data = JSON.parse(data[index]);
-              if (parsed_data.type !== "match") {
-                return null;
-              }
+              // if (parsed_data.type !== "match") {
+              //   return null;
+              // }
 
               return (
                 <div
@@ -356,6 +361,7 @@ function App() {
               );
             }}
           </List>
+          )}
         </div>
       )}
     </div>
