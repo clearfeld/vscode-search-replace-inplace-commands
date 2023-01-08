@@ -129,7 +129,7 @@ export function activate(context: vscode.ExtensionContext) {
         return;
       }
 
-      let cmd = `rg "" ${defaultDir} --json -i`;
+      let cmd = `rg "" "${defaultDir}" --json -i`;
       let dir = null;
 
       /// TODO: investigate this more this seems too hackish to leave as is
@@ -323,7 +323,7 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
           {
             if (defaultDir === null) return;
 
-            let cmd = `rg "${data.value}" ${defaultDir} --json -i`;
+            let cmd = `rg "${data.value}" "${defaultDir}" --json -i`;
 
             cp.exec(cmd, (err: any, stdout: any, stderr: any) => {
               // console.log("stderr: " + stderr);
