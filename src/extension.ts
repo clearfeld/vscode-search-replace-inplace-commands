@@ -9,10 +9,14 @@ let defaultDir: string | null = null;
 async function pathToCurrentFile(): Promise<string | null> {
   const currentEditor = vscode.window.activeTextEditor;
   if (currentEditor) {
-    return currentEditor.document.uri.path;
+    return currentEditor.document.uri.fsPath;
   }
 
   return null;
+}
+
+function IsPlatformWindows() {
+	return process.platform === 'win32';
 }
 
 // let EXT_DefaultDirectory: string;
@@ -120,16 +124,13 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand("clearfeld.consultLine", async () => {
       defaultDir = await pathToCurrentFile();
       console.log("defaultDir - ", defaultDir);
-      if (defaultDir !== null) {
-        defaultDir = defaultDir.substring(1);
-        let x = vscode.Uri.file(defaultDir);
-        console.log("X - ", x);
-        console.log("defaultDir2 - ", defaultDir);
-      } else {
+      if(defaultDir === null) {
+        console.warn("TODO: print error to user");
         return;
       }
 
       let cmd = `rg "" "${defaultDir}" --json -i`;
+
       let dir = null;
 
       /// TODO: investigate this more this seems too hackish to leave as is
