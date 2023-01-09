@@ -1,7 +1,7 @@
 {
   "name": "search-replace-inplace-commands",
   "description": "Additional search replace and inplace commands for vscode.",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "publisher": "clearfeld",
   "icon": "assets/icon.png",
   "private": true,
@@ -49,7 +49,27 @@
         "category": "clearfeld",
         "title": "Consult Line"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Consult Line - Mouse click behaviour",
+      "properties": {
+        "clearfeld-sri-commands.ConslutLine_MouseClickBehaviour": {
+          "type": "string",
+          "enum": [
+            "Close on selection",
+            "Enabled",
+            "Disabled"
+          ],
+          "markdownEnumDescriptions": [
+            "Clicking on a result will move to it, and close (exit) the panel.",
+            "Clicking on a result will move to it, but leave the panel open.",
+            "Mouse click does nothing."
+          ],
+          "default": "Enabled",
+          "description": "Determines what mouse click will do in regards to the consult line panel results."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

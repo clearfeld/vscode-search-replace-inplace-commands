@@ -1,6 +1,6 @@
 # VSCode - More Search Replace and Inplace Commands
 
-## Dependencies 
+## Dependencies
 * [ripgrep](https://github.com/BurntSushi/ripgrep)
 
 ## Commands

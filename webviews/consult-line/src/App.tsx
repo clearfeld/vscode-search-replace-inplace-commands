@@ -13,12 +13,22 @@ const vscode = acquireVsCodeApi();
 // TODO: probably should try to highlight all submatches in the visible view range of the active editor
 // TODO: should probably auto loop to start or end of results when moving through search choices
 
+enum MouseBehaviour {
+  CLOSE_ON_SELECTION = "Close on selection",
+  ENABLED = "Enabled",
+  DISABLED = "Disabled",
+}
+
 function App() {
   const inputRef = useRef(null);
   const listRef = useRef(null);
 
   const [windowDimensions, setWindowDimensions] = useState(
     getWindowDimensions()
+  );
+
+  const [mouseBehaviour, setMouseBehaviour] = useState<MouseBehaviour>(
+    MouseBehaviour.ENABLED
   );
 
   // @ts-ignore
@@ -74,6 +84,25 @@ function App() {
           if (x[0] === "") {
             setShowList(false);
             setDirDataFiltered(x);
+
+            // console.log("CONFIG - ", event.data.configuration);
+            if (
+              event.data.configuration !== undefined &&
+              event.data.configuration !== null
+            ) {
+              switch (event.data.configuration.MouseBehaviour) {
+                case MouseBehaviour.CLOSE_ON_SELECTION:
+                  setMouseBehaviour(MouseBehaviour.CLOSE_ON_SELECTION);
+                  break;
+                case MouseBehaviour.ENABLED:
+                  setMouseBehaviour(MouseBehaviour.ENABLED);
+                  break;
+                case MouseBehaviour.DISABLED:
+                  setMouseBehaviour(MouseBehaviour.DISABLED);
+                  break;
+              }
+            }
+
             return;
           }
 
@@ -322,6 +351,48 @@ function App() {
     );
   }
 
+  function OnResultClick(e: React.MouseEvent<HTMLElement>, index: number): void {
+    switch (mouseBehaviour) {
+      case MouseBehaviour.CLOSE_ON_SELECTION:
+        {
+          setIndexChoice(index);
+          listRef.current!.scrollToItem(index);
+
+          const parsed_res = JSON.parse(dirDataFiltered[index]);
+          vscode.postMessage({
+            type: "MoveToLine",
+            value: parsed_res.data.line_number,
+            start_pos: parsed_res.data.submatches[0].start,
+            end_pos: parsed_res.data.submatches[0].end,
+          });
+
+          vscode.postMessage({
+            type: "Quit",
+          });
+        }
+        break;
+
+      case MouseBehaviour.ENABLED:
+        {
+          setIndexChoice(index);
+          listRef.current!.scrollToItem(index);
+
+          const parsed_res = JSON.parse(dirDataFiltered[index]);
+          vscode.postMessage({
+            type: "MoveToLine",
+            value: parsed_res.data.line_number,
+            start_pos: parsed_res.data.submatches[0].start,
+            end_pos: parsed_res.data.submatches[0].end,
+          });
+        }
+        break;
+
+      // case MouseBehaviour.DISABLED:
+      //
+      // break;
+    }
+  }
+
   return (
     <div className="clearfeld-minibuffer-find-file__root">
       {dirDataFiltered && (
@@ -376,6 +447,8 @@ function App() {
                       (indexChoice === index &&
                         "clearfeld-minibuffer-find-file__result-current-selection ")
                     }
+                    onClick={(e) => OnResultClick(e, index)}
+                    role="Button"
                   >
                     {GenerateLineWithHighlights(parsed_data.data)}
                   </div>

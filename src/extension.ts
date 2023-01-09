@@ -19,14 +19,13 @@ function IsPlatformWindows() {
 	return process.platform === 'win32';
 }
 
-// let EXT_DefaultDirectory: string;
-
-// function PullConfigurationAndSet(): void {
-//   const emffc_config = vscode.workspace.getConfiguration(
-//     "clearfeld-search-replace-inplace-commands"
-//   );
-//   EXT_DefaultDirectory = (emffc_config.get("defaultDirectory") as string) ?? "";
-// }
+let ConsuleLine_MouseClickBehaviour: string;
+function PullConfigurationAndSet(): void {
+  const sric_config = vscode.workspace.getConfiguration(
+    "clearfeld-sri-commands"
+  );
+  ConsuleLine_MouseClickBehaviour = (sric_config.get("ConslutLine_MouseClickBehaviour") as string) ?? "Enabled";
+}
 
 const SearchResultDecorationType = vscode.window.createTextEditorDecorationType(
   {
@@ -55,7 +54,12 @@ function GetCurrentLineInActiveEditor(): number {
 // });
 
 export function activate(context: vscode.ExtensionContext) {
-  // PullConfigurationAndSet();
+  PullConfigurationAndSet();
+  context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
+		if (e.affectsConfiguration("clearfeld-sri-commands")) {
+			PullConfigurationAndSet();
+		}
+	}));
 
   // @ts-ignore
   const provider = new ColorsViewProvider(context.extensionUri);
@@ -154,12 +158,14 @@ export function activate(context: vscode.ExtensionContext) {
 
       provider._view.show(true);
 
+      // console.log("ConsuleLine_MouseClickBehaviour - ", ConsuleLine_MouseClickBehaviour);
       provider._view?.webview.postMessage({
         command: "cp_results",
         data: [""],
         line: GetCurrentLineInActiveEditor(),
-        // data: [],
-        // directory: JSON.stringify(defaultDir),
+        configuration: {
+          MouseBehaviour: ConsuleLine_MouseClickBehaviour
+        },
       });
       return;
       // // this.rgProc = cp.spawn(rgPath, rgArgs.args, { cwd: rootFolder });
