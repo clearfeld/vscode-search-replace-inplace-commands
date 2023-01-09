@@ -17,6 +17,10 @@ function App() {
   const inputRef = useRef(null);
   const listRef = useRef(null);
 
+  const [windowDimensions, setWindowDimensions] = useState(
+    getWindowDimensions()
+  );
+
   // @ts-ignore
   const css_root = getComputedStyle(window.document.body);
   const line_height =
@@ -37,12 +41,26 @@ function App() {
   useEffect(() => {
     // @ts-ignore
     window.addEventListener("message", HandleMessages);
+    window.addEventListener("resize", handleResize);
 
     return () => {
       // @ts-ignore
       window.addEventListener("message", HandleMessages);
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
+
+  function handleResize() {
+    setWindowDimensions(getWindowDimensions());
+  }
+
+  function getWindowDimensions() {
+    const { innerWidth: width, innerHeight: height } = window;
+    return {
+      width,
+      height,
+    };
+  }
 
   function HandleMessages(event: any) {
     switch (event.data.command) {
@@ -333,9 +351,9 @@ function App() {
           {showList && (
             <List
               style={{
-                marginTop: "17px",
+                marginTop: `${line_height + 2}px`,
               }}
-              height={line_height * 13}
+              height={windowDimensions.height - (line_height + 6)}
               itemCount={dirDataFiltered.length}
               itemSize={line_height}
               width={"100%"}
