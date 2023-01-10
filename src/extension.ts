@@ -16,7 +16,7 @@ async function pathToCurrentFile(): Promise<string | null> {
 }
 
 function IsPlatformWindows() {
-	return process.platform === 'win32';
+  return process.platform === "win32";
 }
 
 let ConsuleLine_MouseClickBehaviour: string;
@@ -24,7 +24,8 @@ function PullConfigurationAndSet(): void {
   const sric_config = vscode.workspace.getConfiguration(
     "clearfeld-sri-commands"
   );
-  ConsuleLine_MouseClickBehaviour = (sric_config.get("ConslutLine_MouseClickBehaviour") as string) ?? "Enabled";
+  ConsuleLine_MouseClickBehaviour =
+    (sric_config.get("ConslutLine_MouseClickBehaviour") as string) ?? "Enabled";
 }
 
 const SearchResultDecorationType = vscode.window.createTextEditorDecorationType(
@@ -55,11 +56,13 @@ function GetCurrentLineInActiveEditor(): number {
 
 export function activate(context: vscode.ExtensionContext) {
   PullConfigurationAndSet();
-  context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
-		if (e.affectsConfiguration("clearfeld-sri-commands")) {
-			PullConfigurationAndSet();
-		}
-	}));
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeConfiguration((e) => {
+      if (e.affectsConfiguration("clearfeld-sri-commands")) {
+        PullConfigurationAndSet();
+      }
+    })
+  );
 
   // @ts-ignore
   const provider = new ColorsViewProvider(context.extensionUri);
@@ -128,7 +131,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand("clearfeld.consultLine", async () => {
       defaultDir = await pathToCurrentFile();
       console.log("defaultDir - ", defaultDir);
-      if(defaultDir === null) {
+      if (defaultDir === null) {
         console.warn("TODO: print error to user");
         return;
       }
@@ -164,8 +167,9 @@ export function activate(context: vscode.ExtensionContext) {
         data: [""],
         line: GetCurrentLineInActiveEditor(),
         configuration: {
-          MouseBehaviour: ConsuleLine_MouseClickBehaviour
+          MouseBehaviour: ConsuleLine_MouseClickBehaviour,
         },
+        editor: vscode.window.activeTextEditor,
       });
       return;
       // // this.rgProc = cp.spawn(rgPath, rgArgs.args, { cwd: rootFolder });
@@ -200,6 +204,7 @@ export function activate(context: vscode.ExtensionContext) {
   );
 }
 
+let _ripgrep_results;
 class ColorsViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "clearfeld.minibufferViewConsultLine";
 
@@ -330,6 +335,18 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
           {
             if (defaultDir === null) return;
 
+            if (data.value === "") {
+              const editor = vscode.window.activeTextEditor;
+
+              if (editor) {
+                editor.setDecorations(SearchResultDecorationType, []);
+                editor.setDecorations(WholeLineDecorationType, []);
+              }
+
+              return;
+            }
+
+
             let cmd = `rg "${data.value}" "${defaultDir}" --json -i`;
 
             cp.exec(cmd, (err: any, stdout: any, stderr: any) => {
@@ -348,10 +365,10 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
                 // respect theme color choice
                 // const color = new vscode.ThemeColor('badge.background');
 
-                const result = stdout.split(/\r?\n/);
+                _ripgrep_results = stdout.split(/\r?\n/);
                 this._view?.webview.postMessage({
                   command: "cp_results",
-                  data: result, // JSON.stringify(result),
+                  data: _ripgrep_results, // JSON.stringify(result),
                   line: GetCurrentLineInActiveEditor(),
                 });
 
@@ -428,21 +445,99 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
                 new_range.start,
                 new_range.start
               );
+              editor.revealRange(range);
+
+              const vis_range = editor.visibleRanges;
+              const visible_line_amount =
+                vis_range[0].e.c - vis_range[0].c.c + 1;
+              const bsn_idx = data.index + 1; // Adding 1 for the shift done  in the webview on the results
+              const line_min = line - visible_line_amount;
+              const line_max = line + visible_line_amount;
+
+              // console.log("Visible Lines - ", vis_range);
+              // console.log("_ripgrep_results - ", _ripgrep_results);
+              // // console.log("Visible Line Range amount - ", vis_range[0]);
+              // console.log("Visible Line Range amount - ", vis_range[0].e.c - vis_range[0].c.c);
 
               const smallNumbers: vscode.DecorationOptions[] = [];
               const largeNumbers: vscode.DecorationOptions[] = [];
+
               const decoration = {
                 range: new vscode.Range(new_range.start, new_range.end),
               };
               smallNumbers.push(decoration);
+
+              let idx = bsn_idx;
+              // console.log(_ripgrep_results, idx, bsn_idx, data);
+
+              const rplen: number = _ripgrep_results.length;
+
+              for (;;) {
+                // console.log(_ripgrep_results[idx]);
+                const pr = JSON.parse(_ripgrep_results[idx]);
+                // console.log("pr", pr);
+                if (pr.type !== "match" || pr.data.line_number < line_min) {
+                  break;
+                }
+
+                for (let i = 0; i < pr.data.submatches.length; ++i) {
+                  const _new_range = new vscode.Range(
+                    pr.data.line_number - 1,
+                    pr.data.submatches[i].start,
+                    pr.data.line_number - 1,
+                    pr.data.submatches[i].end
+                  );
+
+                  smallNumbers.push({
+                    range: new vscode.Range(_new_range.start, _new_range.end),
+                  });
+                }
+
+                idx -= 1;
+                if (idx === -1) {
+                  break;
+                }
+              }
+
+              idx = bsn_idx;
+              if (idx < rplen) {
+                for (;;) {
+                  // console.log(_ripgrep_results[idx]);
+                  const pr = JSON.parse(_ripgrep_results[idx]);
+                  // console.log("pr", pr);
+                  if (pr.type !== "match" || pr.data.line_number > line_max) {
+                    break;
+                  }
+
+                  for (let i = 0; i < pr.data.submatches.length; ++i) {
+                    const _new_range = new vscode.Range(
+                      pr.data.line_number - 1,
+                      pr.data.submatches[i].start,
+                      pr.data.line_number - 1,
+                      pr.data.submatches[i].end
+                    );
+
+                    smallNumbers.push({
+                      range: new vscode.Range(_new_range.start, _new_range.end),
+                    });
+                  }
+
+                  idx += 1;
+                  if (idx >= rplen) {
+                    break;
+                  }
+                }
+              }
+
               const decorationz = {
                 range: new vscode.Range(new_range.start, new_range.start),
               };
               largeNumbers.push(decorationz);
+
               editor.setDecorations(SearchResultDecorationType, smallNumbers);
               editor.setDecorations(WholeLineDecorationType, largeNumbers);
 
-              editor.revealRange(range);
+              // editor.revealRange(range);
             }
           }
           break;

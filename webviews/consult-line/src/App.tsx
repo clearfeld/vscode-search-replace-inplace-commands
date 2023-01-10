@@ -21,6 +21,7 @@ enum MouseBehaviour {
 function App() {
   const inputRef = useRef(null);
   const listRef = useRef(null);
+  const editorRef = useRef(null);
 
   const [windowDimensions, setWindowDimensions] = useState(
     getWindowDimensions()
@@ -139,12 +140,17 @@ function App() {
           setDirDataFiltered(sort);
           setShowList(true);
 
+          if(editorRef.current === null) {
+            editorRef.current = event.data.editor;
+          }
+
           const parsed_res = JSON.parse(sort[0]);
           vscode.postMessage({
             type: "MoveToLine",
             value: parsed_res.data.line_number,
             start_pos: parsed_res.data.submatches[0].start,
             end_pos: parsed_res.data.submatches[0].end,
+            index: 0
           });
         }
         break;
@@ -193,6 +199,15 @@ function App() {
       // setDirDataFiltered(dirData);
       setIndexChoice(0);
       window.scrollBy(0, 0);
+
+      vscode.postMessage({
+        type: "SearchValueChange",
+        value: "",
+      });
+
+      setShowList(false);
+      // setDirDataFiltered([""]);
+
     } else {
       setIndexChoice(0);
       window.scrollBy(0, 0);
@@ -267,6 +282,10 @@ function App() {
     listRef.current!.scrollToItem(idx);
     setIndexChoice(idx);
 
+    if(editorRef.current) {
+      console.log("Visible rangesZ - ", editorRef.current.visibleRanges);
+    }
+
     const parsed_res = JSON.parse(dirDataFiltered[idx]);
 
     vscode.postMessage({
@@ -274,6 +293,7 @@ function App() {
       value: parsed_res.data.line_number,
       start_pos: parsed_res.data.submatches[0].start,
       end_pos: parsed_res.data.submatches[0].end,
+      index: idx,
     });
   }
 
@@ -343,6 +363,7 @@ function App() {
             value: parsed_res.data.line_number,
             start_pos: parsed_res.data.submatches[0].start,
             end_pos: parsed_res.data.submatches[0].end,
+            index: index,
           });
 
           vscode.postMessage({
@@ -362,6 +383,7 @@ function App() {
             value: parsed_res.data.line_number,
             start_pos: parsed_res.data.submatches[0].start,
             end_pos: parsed_res.data.submatches[0].end,
+            index: index,
           });
         }
         break;
