@@ -45,7 +45,6 @@ function App() {
   const [indexChoice, setIndexChoice] = useState<number>(0);
   const [iv, setIV] = useState<string>("");
   const [showList, setShowList] = useState<boolean>(false);
-  const [editorLine, setEditorLine] = useState<number>(0);
 
   useEffect(() => {
     // @ts-ignore
@@ -129,8 +128,6 @@ function App() {
             x.shift();
           }
 
-          setEditorLine(event.data.line);
-
           // console.log(x);
           let res = BinarySearchNearest(x, event.data.line);
           // console.log("res bsn - ", res);
@@ -171,6 +168,7 @@ function App() {
       const ap = JSON.parse(arr[mid]);
       if (ap.type !== "match") {
         // TODO: test this out a bit for desired behaviour
+        // this probably isn't needed anymore double check and test
         return mid; // -1
       }
 
@@ -309,20 +307,9 @@ function App() {
       value: line.substr(str_start, line.length - 1),
     });
 
-    const line_number_color_class =
-      "clearfeld-webview-consult-line__list-search-result-line-number-color-below";
-    // TODO: probably should highlight values above and below current line with a different line number color
-    // if (editorLine > LineObject.line_number) {
-    //   line_number_color_class =
-    //     "clearfeld-webview-consult-line__list-search-result-line-number-color-below";
-    // } else {
-    //   line_number_color_class =
-    //     "clearfeld-webview-consult-line__list-search-result-line-number-color-above";
-    // }
-
     return (
       <pre className="clearfeld-webview-consult-line__list-search-result-row">
-        <span className={line_number_color_class}>
+        <span className="clearfeld-webview-consult-line__list-search-result-line-number-color-below">
           {LineObject.line_number}:
         </span>
         {line_poritions.map((line_block: any, lidx: number) => {
@@ -340,7 +327,10 @@ function App() {
     );
   }
 
-  function OnResultClick(e: React.MouseEvent<HTMLElement>, index: number): void {
+  function OnResultClick(
+    e: React.MouseEvent<HTMLElement>,
+    index: number
+  ): void {
     switch (mouseBehaviour) {
       case MouseBehaviour.CLOSE_ON_SELECTION:
         {
