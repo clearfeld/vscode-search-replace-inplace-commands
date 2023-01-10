@@ -9,9 +9,8 @@ import { DebugConsoleMode } from "vscode";
 // @ts-ignore
 const vscode = acquireVsCodeApi();
 
-// TODO: maybe have escape & ctrl+g return to the last line before search started (ouble check emacs consult line behaviour)
+// TODO: maybe have escape & ctrl+g return to the last line before search started (double check emacs consult line behaviour)
 // TODO: probably should try to highlight all submatches in the visible view range of the active editor
-// TODO: should probably auto loop to start or end of results when moving through search choices
 
 enum MouseBehaviour {
   CLOSE_ON_SELECTION = "Close on selection",
@@ -243,40 +242,16 @@ function App() {
     if (e.keyCode === 38) {
       e.preventDefault();
       if (indexChoice !== 0) {
-        setIndexChoice(indexChoice - 1);
-        // window.scrollBy(0, -line_height);
-        listRef.current!.scrollToItem(indexChoice - 1);
-        // listRef.current.scrollBy(0, -line_height);
-
-        // console.log(dirDataFiltered[indexChoice - 1]);
-        // console.log(dirDataFiltered[indexChoice - 1].split(":")[0]);
-
-        const parsed_res = JSON.parse(dirDataFiltered[indexChoice - 1]);
-
-        vscode.postMessage({
-          type: "MoveToLine",
-          value: parsed_res.data.line_number,
-          start_pos: parsed_res.data.submatches[0].start,
-          end_pos: parsed_res.data.submatches[0].end,
-        });
+        MoveToIndexChoiceLine(indexChoice - 1);
+      } else {
+        MoveToIndexChoiceLine(dirDataFiltered.length - 1);
       }
     } else if (e.keyCode === 40) {
       e.preventDefault();
       if (indexChoice !== dirDataFiltered.length - 1) {
-        listRef.current!.scrollToItem(indexChoice + 1);
-        setIndexChoice(indexChoice + 1);
-
-        const parsed_res = JSON.parse(dirDataFiltered[indexChoice + 1]);
-
-        vscode.postMessage({
-          type: "MoveToLine",
-          value: parsed_res.data.line_number,
-          start_pos: parsed_res.data.submatches[0].start,
-          end_pos: parsed_res.data.submatches[0].end,
-        });
-
-        // window.scrollBy(0, line_height);
-        // listRef.current.scrollBy(0, line_height);
+        MoveToIndexChoiceLine(indexChoice + 1);
+      } else {
+        MoveToIndexChoiceLine(0);
       }
     } else if ((e.ctrlKey && e.keyCode === 71) || e.keyCode === 27) {
       // ctrl + g || escape
@@ -288,6 +263,20 @@ function App() {
 
       return;
     }
+  }
+
+  function MoveToIndexChoiceLine(idx: number): void {
+    listRef.current!.scrollToItem(idx);
+    setIndexChoice(idx);
+
+    const parsed_res = JSON.parse(dirDataFiltered[idx]);
+
+    vscode.postMessage({
+      type: "MoveToLine",
+      value: parsed_res.data.line_number,
+      start_pos: parsed_res.data.submatches[0].start,
+      end_pos: parsed_res.data.submatches[0].end,
+    });
   }
 
   function GenerateLineWithHighlights(LineObject: any) {
