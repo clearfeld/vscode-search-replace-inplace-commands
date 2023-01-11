@@ -1,6 +1,5 @@
 import { useState, React, useEffect, useRef } from "react";
 
-// import reactLogo from "./assets/react.svg";
 import "./App.css";
 import { FixedSizeList as List } from "react-window";
 import { CSSProperties } from "react";
@@ -9,7 +8,6 @@ import { DebugConsoleMode } from "vscode";
 // @ts-ignore
 const vscode = acquireVsCodeApi();
 
-// TODO: maybe have escape & ctrl+g return to the last line before search started (double check emacs consult line behaviour)
 // TODO: look into shiki for syntax highlighting the lines within the results list
 
 enum MouseBehaviour {
@@ -76,13 +74,11 @@ function App() {
       case "cp_results":
         {
           setIndexChoice(0);
-          // console.log("RawRawRaw Data", event.data.data);
 
           if (editorLine.current === null) {
             editorLine.current = event.data.line;
           }
 
-          // console.log("line", event.data.line);
           let x = event.data.data;
           if (x[0] === "") {
             setShowList(false);
@@ -111,8 +107,6 @@ function App() {
 
           let idx = x.length - 1;
 
-          // console.log(x, idx);
-
           // Sometimes the last element in the ripgrep json will be an empty line
           if (x[idx] === "") {
             x.pop();
@@ -133,12 +127,8 @@ function App() {
             x.shift();
           }
 
-          // console.log(x);
           let res = BinarySearchNearest(x, event.data.line.line);
-          // console.log("res bsn - ", res);
-
           let sort = [...x.slice(res, x.length), ...x.slice(0, res)];
-
           // console.log(sort);
 
           setDirDataFiltered(sort);
@@ -160,11 +150,10 @@ function App() {
   function BinarySearchNearest(arr: [], line: number): number {
     let start = 0;
     let end = arr.length - 1;
-    let mid; //  = Math.floor((start + end) / 2);
+    let mid;
 
     while (start <= end) {
       mid = Math.floor((start + end) / 2);
-      // console.log("MSE ", mid, start, end);
 
       if (mid + 1 === end || mid - 1 === start) {
         // nearest or exact match
@@ -174,11 +163,10 @@ function App() {
       const ap = JSON.parse(arr[mid]);
       if (ap.type !== "match") {
         // TODO: test this out a bit for desired behaviour
-        // this probably isn't needed anymore double check and test
-        return mid; // -1
+        // TODO: this probably isn't needed anymore double check and test
+        return mid;
       }
 
-      // console.log("Line numbers - ", ap.data.line_number, line);
       if (line < ap.data.line_number) {
         end = mid - 1;
       } else {
@@ -192,11 +180,9 @@ function App() {
   }
 
   function InputOnChange(e) {
-    // console.log(e.target.value);
     setIV(e.target.value);
 
     if (e.target.value === "") {
-      // setDirDataFiltered(dirData);
       setIndexChoice(0);
       window.scrollBy(0, 0);
 
@@ -206,7 +192,6 @@ function App() {
       });
 
       setShowList(false);
-      // setDirDataFiltered([""]);
     } else {
       setIndexChoice(0);
       window.scrollBy(0, 0);
@@ -327,6 +312,9 @@ function App() {
       value: line.substr(str_start, line.length - 1),
     });
 
+    // Maybe should highlight line numbers below and above the cursor differently
+    // check consult.el some more and see how it handles it in the various functions
+
     return (
       <pre className="clearfeld-webview-consult-line__list-search-result-row">
         <span className="clearfeld-webview-consult-line__list-search-result-line-number-color-below">
@@ -434,12 +422,7 @@ function App() {
               ref={listRef}
             >
               {({ index, style, data }) => {
-                // if(data[index] === "") return null;
-
                 const parsed_data = JSON.parse(data[index]);
-                // if (parsed_data.type !== "match") {
-                //   return null;
-                // }
 
                 return (
                   <div
