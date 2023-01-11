@@ -212,7 +212,7 @@ export function activate(context: vscode.ExtensionContext) {
   );
 }
 
-let _ripgrep_results;
+let _ripgrep_results: [];
 class ColorsViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "clearfeld.minibufferViewConsultLine";
 
@@ -455,8 +455,8 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
               editor.revealRange(range);
 
               const vis_range = editor.visibleRanges;
-              const visible_line_amount =
-                vis_range[0].e.c - vis_range[0].c.c + 1;
+              // @ts-ignore
+              const visible_line_amount = vis_range[0].e.c - vis_range[0].c.c + 1;
               const bsn_idx = data.index + 1; // Adding 1 for the shift done  in the webview on the results
               const line_min = line - visible_line_amount;
               const line_max = line + visible_line_amount;

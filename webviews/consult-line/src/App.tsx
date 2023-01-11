@@ -9,6 +9,7 @@ import { DebugConsoleMode } from "vscode";
 const vscode = acquireVsCodeApi();
 
 // TODO: look into shiki for syntax highlighting the lines within the results list
+// TODO: maybe tab should let you move through the submatches on a line
 
 enum MouseBehaviour {
   CLOSE_ON_SELECTION = "Close on selection",
