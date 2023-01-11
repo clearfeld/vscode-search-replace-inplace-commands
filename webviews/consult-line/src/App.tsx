@@ -10,7 +10,7 @@ import { DebugConsoleMode } from "vscode";
 const vscode = acquireVsCodeApi();
 
 // TODO: maybe have escape & ctrl+g return to the last line before search started (double check emacs consult line behaviour)
-// TODO: probably should try to highlight all submatches in the visible view range of the active editor
+// TODO: look into shiki for syntax highlighting the lines within the results list
 
 enum MouseBehaviour {
   CLOSE_ON_SELECTION = "Close on selection",
@@ -21,7 +21,7 @@ enum MouseBehaviour {
 function App() {
   const inputRef = useRef(null);
   const listRef = useRef(null);
-  const editorRef = useRef(null);
+  const editorLine = useRef<any | null>(null);
 
   const [windowDimensions, setWindowDimensions] = useState(
     getWindowDimensions()
@@ -78,6 +78,10 @@ function App() {
           setIndexChoice(0);
           // console.log("RawRawRaw Data", event.data.data);
 
+          if (editorLine.current === null) {
+            editorLine.current = event.data.line;
+          }
+
           // console.log("line", event.data.line);
           let x = event.data.data;
           if (x[0] === "") {
@@ -130,7 +134,7 @@ function App() {
           }
 
           // console.log(x);
-          let res = BinarySearchNearest(x, event.data.line);
+          let res = BinarySearchNearest(x, event.data.line.line);
           // console.log("res bsn - ", res);
 
           let sort = [...x.slice(res, x.length), ...x.slice(0, res)];
@@ -140,17 +144,13 @@ function App() {
           setDirDataFiltered(sort);
           setShowList(true);
 
-          if(editorRef.current === null) {
-            editorRef.current = event.data.editor;
-          }
-
           const parsed_res = JSON.parse(sort[0]);
           vscode.postMessage({
             type: "MoveToLine",
             value: parsed_res.data.line_number,
             start_pos: parsed_res.data.submatches[0].start,
             end_pos: parsed_res.data.submatches[0].end,
-            index: 0
+            index: 0,
           });
         }
         break;
@@ -207,7 +207,6 @@ function App() {
 
       setShowList(false);
       // setDirDataFiltered([""]);
-
     } else {
       setIndexChoice(0);
       window.scrollBy(0, 0);
@@ -254,17 +253,21 @@ function App() {
 
     if (e.keyCode === 38) {
       e.preventDefault();
-      if (indexChoice !== 0) {
-        MoveToIndexChoiceLine(indexChoice - 1);
-      } else {
-        MoveToIndexChoiceLine(dirDataFiltered.length - 1);
+      if (showList) {
+        if (indexChoice !== 0) {
+          MoveToIndexChoiceLine(indexChoice - 1);
+        } else {
+          MoveToIndexChoiceLine(dirDataFiltered.length - 1);
+        }
       }
     } else if (e.keyCode === 40) {
       e.preventDefault();
-      if (indexChoice !== dirDataFiltered.length - 1) {
-        MoveToIndexChoiceLine(indexChoice + 1);
-      } else {
-        MoveToIndexChoiceLine(0);
+      if (showList) {
+        if (indexChoice !== dirDataFiltered.length - 1) {
+          MoveToIndexChoiceLine(indexChoice + 1);
+        } else {
+          MoveToIndexChoiceLine(0);
+        }
       }
     } else if ((e.ctrlKey && e.keyCode === 71) || e.keyCode === 27) {
       // ctrl + g || escape
@@ -272,6 +275,7 @@ function App() {
 
       vscode.postMessage({
         type: "Quit",
+        line: editorLine.current,
       });
 
       return;
@@ -281,10 +285,6 @@ function App() {
   function MoveToIndexChoiceLine(idx: number): void {
     listRef.current!.scrollToItem(idx);
     setIndexChoice(idx);
-
-    if(editorRef.current) {
-      console.log("Visible rangesZ - ", editorRef.current.visibleRanges);
-    }
 
     const parsed_res = JSON.parse(dirDataFiltered[idx]);
 
@@ -368,6 +368,7 @@ function App() {
 
           vscode.postMessage({
             type: "Quit",
+            line: null,
           });
         }
         break;

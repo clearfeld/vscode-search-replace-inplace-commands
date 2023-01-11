@@ -39,13 +39,21 @@ const WholeLineDecorationType = vscode.window.createTextEditorDecorationType({
   backgroundColor: "var(--vscode-list-inactiveSelectionBackground)",
 });
 
-function GetCurrentLineInActiveEditor(): number {
+function GetCurrentLineInActiveEditor(): any | null {
   const editor = vscode.window.activeTextEditor;
   if (editor != null) {
-    return editor.selection.active.line;
+    // return editor.selection.active.line;
+
+    return {
+      line: editor.selection.active.line,
+      selection: editor.selection,
+    };
     // console.log(editor.selection.active.line);
   } else {
-    return 0;
+    return {
+      line: 0,
+      selection: null,
+    };
   }
 }
 // const largeNumberDecorationType = vscode.window.createTextEditorDecorationType({
@@ -346,7 +354,6 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
               return;
             }
 
-
             let cmd = `rg "${data.value}" "${defaultDir}" --json -i`;
 
             cp.exec(cmd, (err: any, stdout: any, stderr: any) => {
@@ -595,6 +602,27 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
             }
 
             ClosePanelOnCompletionIfNotInitiallyOpened();
+
+            if (data.line !== -1) {
+              const editor = vscode.window.activeTextEditor;
+              if (editor) {
+                const line = data.line.line;
+                const range = editor.document.lineAt(line).range;
+
+                const new_range = new vscode.Range(
+                  line,
+                  data.line.selection.start.character,
+                  line,
+                  data.line.selection.start.character
+                );
+
+                editor.selection = new vscode.Selection(
+                  new_range.start,
+                  new_range.start
+                );
+                editor.revealRange(range);
+              }
+            }
           }
           break;
       }
