@@ -21,6 +21,7 @@ function App() {
   const inputRef = useRef(null);
   const listRef = useRef(null);
   const editorLine = useRef<any | null>(null);
+  const startingEditorLine = useRef<number>(-1);
 
   const [windowDimensions, setWindowDimensions] = useState(
     getWindowDimensions()
@@ -45,6 +46,7 @@ function App() {
   const [indexChoice, setIndexChoice] = useState<number>(0);
   const [iv, setIV] = useState<string>("");
   const [showList, setShowList] = useState<boolean>(false);
+  const [lineSplit, setLineSplit] = useState<number>(0);
 
   useEffect(() => {
     // @ts-ignore
@@ -128,7 +130,11 @@ function App() {
             x.shift();
           }
 
-          let res = BinarySearchNearest(x, event.data.line.line);
+          if (startingEditorLine.current === -1) {
+            startingEditorLine.current = event.data.line.line + 1;
+          }
+
+          let res = BinarySearchNearest(x, startingEditorLine.current);
           let sort = [...x.slice(res, x.length), ...x.slice(0, res)];
           // console.log(sort);
 
@@ -136,6 +142,9 @@ function App() {
           setShowList(true);
 
           const parsed_res = JSON.parse(sort[0]);
+
+          setLineSplit(parsed_res.data.line_number);
+
           vscode.postMessage({
             type: "MoveToLine",
             value: parsed_res.data.line_number,
@@ -156,26 +165,33 @@ function App() {
     while (start <= end) {
       mid = Math.floor((start + end) / 2);
 
-      if (mid + 1 === end || mid - 1 === start) {
-        // nearest or exact match
-        return mid;
-      }
-
       const ap = JSON.parse(arr[mid]);
-      if (ap.type !== "match") {
-        // TODO: test this out a bit for desired behaviour
-        // TODO: this probably isn't needed anymore double check and test
-        return mid;
-      }
 
       if (line < ap.data.line_number) {
         end = mid - 1;
-      } else {
+      } else if (line > ap.data.line_number) {
         start = mid + 1;
+      } else {
+        return mid;
+      }
+
+      if (mid === end || mid === start) {
+        // nearest match
+        // basis following line result, if that doesnt exist loop back around to start
+
+        if (line > ap.data.line_number) {
+          if (mid + 1 <= arr.length - 1) {
+            return mid + 1;
+          } else {
+            return 0;
+          }
+        } else {
+          return mid;
+        }
       }
     }
 
-    // TODO: testing
+    // TODO: test - log error to user - bug should be reported if this is somehow reached
     // If error just default to using first_index
     return 0;
   }
@@ -313,12 +329,18 @@ function App() {
       value: line.substr(str_start, line.length - 1),
     });
 
-    // Maybe should highlight line numbers below and above the cursor differently
-    // check consult.el some more and see how it handles it in the various functions
+    let line_number_color_class;
+    if (lineSplit <= LineObject.line_number) {
+      line_number_color_class =
+        "clearfeld-webview-consult-line__list-search-result-line-number-color-below";
+    } else {
+      line_number_color_class =
+        "clearfeld-webview-consult-line__list-search-result-line-number-color-above";
+    }
 
     return (
       <pre className="clearfeld-webview-consult-line__list-search-result-row">
-        <span className="clearfeld-webview-consult-line__list-search-result-line-number-color-below">
+        <span className={line_number_color_class}>
           {LineObject.line_number}:
         </span>
         {line_poritions.map((line_block: any, lidx: number) => {
