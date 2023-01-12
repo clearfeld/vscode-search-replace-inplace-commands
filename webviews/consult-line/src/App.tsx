@@ -10,12 +10,18 @@ const vscode = acquireVsCodeApi();
 
 // TODO: look into shiki for syntax highlighting the lines within the results list
 // TODO: maybe tab should let you move through the submatches on a line
+// TODO: add configuration option to go through results similar to emacs (ie. ctrl+n and ctrl+p and maybe make a note for ctrl+j and ctrl+k) use config options for each one.
 
 enum MouseBehaviour {
   CLOSE_ON_SELECTION = "Close on selection",
   ENABLED = "Enabled",
   DISABLED = "Disabled",
 }
+
+const search_result_highlight_color =
+  "clearfeld-webview-consult-line__list-search-result-highlight";
+const search_result_highlight_current_color =
+  "clearfeld-webview-consult-line__list-search-result-current-highlight";
 
 function App() {
   const inputRef = useRef(null);
@@ -299,7 +305,7 @@ function App() {
     });
   }
 
-  function GenerateLineWithHighlights(LineObject: any) {
+  function GenerateLineWithHighlights(LineObject: any, index: number) {
     const line = LineObject.lines.text;
     let line_poritions = [];
     let str_start = 0;
@@ -338,6 +344,13 @@ function App() {
         "clearfeld-webview-consult-line__list-search-result-line-number-color-above";
     }
 
+    let cm = false;
+    if (indexChoice === index) {
+      cm = true;
+    }
+
+    let current_selection = 0;
+
     return (
       <pre className="clearfeld-webview-consult-line__list-search-result-row">
         <span className={line_number_color_class}>
@@ -345,8 +358,14 @@ function App() {
         </span>
         {line_poritions.map((line_block: any, lidx: number) => {
           if (line_block.highlight) {
+            let search_result_highlight = search_result_highlight_color;
+            if (cm && current_selection === 0) {
+              current_selection = -1;
+              search_result_highlight = search_result_highlight_current_color;
+            }
+
             return (
-              <span className="clearfeld-webview-consult-line__list-search-result-highlight">
+              <span className={search_result_highlight}>
                 {line_block.value}
               </span>
             );
@@ -458,7 +477,7 @@ function App() {
                     onClick={(e) => OnResultClick(e, index)}
                     role="Button"
                   >
-                    {GenerateLineWithHighlights(parsed_data.data)}
+                    {GenerateLineWithHighlights(parsed_data.data, index)}
                   </div>
                 );
               }}

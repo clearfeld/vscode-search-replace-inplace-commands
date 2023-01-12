@@ -6,6 +6,8 @@ import * as cp from "child_process";
 
 let defaultDir: string | null = null;
 
+// TODO: if panel is closed cancel all decorations and search
+
 async function pathToCurrentFile(): Promise<string | null> {
   const currentEditor = vscode.window.activeTextEditor;
   if (currentEditor) {
@@ -31,6 +33,12 @@ function PullConfigurationAndSet(): void {
 const SearchResultDecorationType = vscode.window.createTextEditorDecorationType(
   {
     backgroundColor: "var(--vscode-editor-findMatchHighlightBackground)",
+  }
+);
+
+const CurrentSearchResultDecorationType = vscode.window.createTextEditorDecorationType(
+  {
+    backgroundColor: "var(--vscode-editor-findMatchBackground)",
   }
 );
 
@@ -349,6 +357,7 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
               if (editor) {
                 editor.setDecorations(SearchResultDecorationType, []);
                 editor.setDecorations(WholeLineDecorationType, []);
+                editor.setDecorations(CurrentSearchResultDecorationType, []);
               }
 
               return;
@@ -536,6 +545,12 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
                 }
               }
 
+              // CurrentSearchResultDecorationType
+              let csrdt_ranges = [];
+              csrdt_ranges.push({
+                range: new vscode.Range(new_range.start, new_range.end),
+              });
+
               const decorationz = {
                 range: new vscode.Range(new_range.start, new_range.start),
               };
@@ -543,6 +558,7 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
 
               editor.setDecorations(SearchResultDecorationType, smallNumbers);
               editor.setDecorations(WholeLineDecorationType, largeNumbers);
+              editor.setDecorations(CurrentSearchResultDecorationType, csrdt_ranges);
 
               // editor.revealRange(range);
             }
@@ -578,6 +594,7 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
 
               editor.setDecorations(SearchResultDecorationType, []);
               editor.setDecorations(WholeLineDecorationType, []);
+              editor.setDecorations(CurrentSearchResultDecorationType, []);
 
               editor.revealRange(range);
             }
@@ -599,6 +616,7 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
             if (editor) {
               editor.setDecorations(SearchResultDecorationType, []);
               editor.setDecorations(WholeLineDecorationType, []);
+              editor.setDecorations(CurrentSearchResultDecorationType, []);
             }
 
             ClosePanelOnCompletionIfNotInitiallyOpened();

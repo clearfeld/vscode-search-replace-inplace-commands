@@ -56,5 +56,8 @@
   color: var(--vscode-charts-orange);
 }
 .clearfeld-webview-consult-line__list-search-result-highlight {
-  background-color: var(--vscode-terminal-findMatchHighlightBackground);
+  background-color: var(--vscode-editor-findMatchHighlightBackground);
+}
+.clearfeld-webview-consult-line__list-search-result-current-highlight {
+  background-color: var(--vscode-editor-findMatchBackground);
 }
