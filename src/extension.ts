@@ -70,6 +70,12 @@ function GetCurrentLineInActiveEditor(): any | null {
 //   backgroundColor: "red", // { id: 'myextension.largeNumberBackground' }
 // });
 
+function ClearDecorations(editor: any): void {
+  editor.setDecorations(SearchResultDecorationType, []);
+  editor.setDecorations(WholeLineDecorationType, []);
+  editor.setDecorations(CurrentSearchResultDecorationType, []);
+}
+
 export function activate(context: vscode.ExtensionContext) {
   PullConfigurationAndSet();
   context.subscriptions.push(
@@ -355,9 +361,7 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
               const editor = vscode.window.activeTextEditor;
 
               if (editor) {
-                editor.setDecorations(SearchResultDecorationType, []);
-                editor.setDecorations(WholeLineDecorationType, []);
-                editor.setDecorations(CurrentSearchResultDecorationType, []);
+                ClearDecorations(editor);
               }
 
               return;
@@ -592,9 +596,7 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
                 new_range.start
               );
 
-              editor.setDecorations(SearchResultDecorationType, []);
-              editor.setDecorations(WholeLineDecorationType, []);
-              editor.setDecorations(CurrentSearchResultDecorationType, []);
+              ClearDecorations(editor);
 
               editor.revealRange(range);
             }
@@ -614,9 +616,7 @@ class ColorsViewProvider implements vscode.WebviewViewProvider {
 
             const editor = vscode.window.activeTextEditor;
             if (editor) {
-              editor.setDecorations(SearchResultDecorationType, []);
-              editor.setDecorations(WholeLineDecorationType, []);
-              editor.setDecorations(CurrentSearchResultDecorationType, []);
+              ClearDecorations(editor);
             }
 
             ClosePanelOnCompletionIfNotInitiallyOpened();
